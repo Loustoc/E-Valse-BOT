@@ -1,180 +1,75 @@
-        ;; RK - EvalBot (Cortex-M3 TI Stellaris)
-        ;; Blink LED1 (PF4) and LED2 (PF5) alternately
-
-        AREA |.text|, CODE, READONLY
+		AREA |.text|, CODE, READONLY, ALIGN=2
         ENTRY
         EXPORT __main
+        IMPORT SD_Init
+		IMPORT SD_ReadSector
 
-;----------------------------
-; Peripheral base addresses
-;----------------------------
+GPIO_PORTF_BASE EQU 0x40025000
+PIN_RIGHT       EQU 0x10
+PIN_LEFT        EQU 0x20
 
-		;; The IMPORT command specifies that a symbol is defined in a shared object at runtime.
-		IMPORT	MOTEUR_INIT					; initialise les moteurs (configure les pwms + GPIO)
-		
-		IMPORT	MOTEUR_DROIT_ON				; activer le moteur droit
-		IMPORT  MOTEUR_DROIT_OFF			; déactiver le moteur droit
-		IMPORT  MOTEUR_DROIT_AVANT			; moteur droit tourne vers l'avant
-		IMPORT  MOTEUR_DROIT_ARRIERE		; moteur droit tourne vers l'arrière
-		IMPORT  MOTEUR_DROIT_INVERSE		; inverse le sens de rotation du moteur droit
-		
-		IMPORT	MOTEUR_GAUCHE_ON			; activer le moteur gauche
-		IMPORT  MOTEUR_GAUCHE_OFF			; déactiver le moteur gauche
-		IMPORT  MOTEUR_GAUCHE_AVANT			; moteur gauche tourne vers l'avant
-		IMPORT  MOTEUR_GAUCHE_ARRIERE		; moteur gauche tourne vers l'arrière
-		IMPORT  MOTEUR_GAUCHE_INVERSE		; inverse le sens de rotation du moteur gauche
-
-
-SYSCTL_PERIPH_GPIOF EQU 0x400FE108
-GPIO_PORTF_BASE     EQU 0x40025000
-
-; GPIO offsets
-GPIO_O_DIR          EQU 0x400   ; Direction
-GPIO_O_DR2R         EQU 0x500   ; 2-mA drive
-GPIO_O_DEN          EQU 0x51C   ; Digital Enable
-
-; LED pins
-LED1                EQU 0x10    ; PF4
-LED2                EQU 0x20    ; PF5
-
-; Delay
-DUREE               EQU 0x001FFFFF
-
-;----------------------------
-; Main program
-;----------------------------
+        AREA |.text|, CODE, READONLY
 __main
-        ;; Enable clock for Port F
-        LDR     R6, =SYSCTL_PERIPH_GPIOF
-        MOV     R0, #0x20         ; bit 5 = GPIOF
-        STR     R0, [R6]
-
-        ;; small delay for clock to stabilize
+        ; Horloge Port F
+        LDR     R0, =0x400FE108
+        LDR     R1, [R0]
+        ORR     R1, R1, #0x20
+        STR     R1, [R0]
         NOP
         NOP
-        NOP
+		NOP
+        ; Config PF4/PF5
+        LDR     R0, =GPIO_PORTF_BASE
+        MOV     R1, #0x30
+        STR     R1, [R0, #0x400]
+        STR     R1, [R0, #0x51C]
+		NOP
+		NOP
+		NOP
+        ; Flash initial (Vérifie que le CPU tourne)
+        MOV     R1, #0x30
+        STR     R1, [R0, #0x3FC]
+		NOP
+		NOP
+		NOP
+        LDR     R2, =1000000
+W_FL    SUBS    R2, R2, #1
+        BNE     W_FL
+        MOV     R1, #0
+        STR     R1, [R0, #0x3FC]
 
-        ;; Configure LED pins as output
-        LDR     R6, =GPIO_PORTF_BASE + GPIO_O_DIR
-        LDR     R0, =LED1 | LED2
-        STR     R0, [R6]
+		BL      SD_Init
+        CMP     R0, #1
+		BNE LOOP_FIN
+		LDR     R1, =0x20000000     ; Adresse RAM cible
+		BL      SD_ReadSector
+FIN_PROGRAMME
+        MOV     R1, #0
+        LDR     R0, =GPIO_PORTF_BASE
+        STR     R1, [R0, #0x3FC]    ; Éteint tout en fin de danse
+STOP    B       STOP
 
-        ;; Enable digital function
-        LDR     R6, =GPIO_PORTF_BASE + GPIO_O_DEN
-        STR     R0, [R6]
+Panic   LDR     R0, =0x400253FC
+        MOV     R1, #0x02           ; LED Rouge
+        STR     R1, [R0]
+        ;B       Loop
+        B LOOP_FIN
 
-        ;; 2-mA drive
-        LDR     R6, =GPIO_PORTF_BASE + GPIO_O_DR2R
-        STR     R0, [R6]
-
-        ;; Prepare LED masks
-        LDR     R2, =0x00          ; all LEDs OFF
-        LDR     R3, =LED1          ; LED1 ON
-        LDR     R4, =LED2          ; LED2 ON
-
-        ;; Use GPIODATA address mapping for pins
-        LDR     R5, =GPIO_PORTF_BASE + (LED1<<2)  ; LED1 data address
-        LDR     R7, =GPIO_PORTF_BASE + (LED2<<2)  ; LED2 data address
-		
-		
-		;; BL Branchement vers un lien (sous programme)
-
-		; Configure les PWM + GPIO
-		BL	MOTEUR_INIT	   		   
-		
-		; Activer les deux moteurs droit et gauche
-		BL	MOTEUR_DROIT_ON
-		BL	MOTEUR_GAUCHE_ON
-		
-		
-
-;----------------------------
-; Blink loop
-;----------------------------
-loop
-        ;; LED1 ON, LED2 OFF
-        STR     R3, [R5]           ; LED1 ON
-        STR     R2, [R7]           ; LED2 OFF
-        LDR     R1, =DUREE/8
-wait1   SUBS    R1, #1
-        BNE     wait1
-
-        ;; LED1 OFF, LED2 ON
-        STR     R2, [R5]           ; LED1 OFF
-        STR     R4, [R7]           ; LED2 ON
-        LDR     R1, =DUREE/8
-wait2   SUBS    R1, #1
-        BNE     wait2
-		
-
-; Evalbot avance droit devant
-	
-		BL		MOTEUR_GAUCHE_AVANT	   
-		BL		MOTEUR_DROIT_AVANT
-
-		
-		LDR     R1, =DUREE*5
-wait3   SUBS    R1, #1
-        BNE     wait3
-		
-		
-		
-		BL 		MOTEUR_GAUCHE_AVANT
-		BL 		MOTEUR_DROIT_ARRIERE
-		
-		LDR     R1, =DUREE*12
-wait4   SUBS    R1, #1
-        BNE     wait4
-		
-		
-		
-		BL 		MOTEUR_GAUCHE_ARRIERE
-		BL 		MOTEUR_DROIT_AVANT
-		
-		LDR     R1, =DUREE*12
-wait8   SUBS    R1, #1
-        BNE     wait8
-		
-		
-		
-		BL		MOTEUR_GAUCHE_AVANT	   
-		BL		MOTEUR_DROIT_AVANT
-
-		
-		LDR     R1, =DUREE*5
-wait5   SUBS    R1, #1
-        BNE     wait5
-		
-		
-		
-		BL		MOTEUR_GAUCHE_AVANT	  
-		BL		MOTEUR_DROIT_OFF
-
-		
-		LDR     R1, =DUREE*10
-wait6   SUBS    R1, #1
-        BNE     wait6
-		
-		BL		MOTEUR_DROIT_ON
-		BL		MOTEUR_GAUCHE_AVANT	   
-		BL		MOTEUR_DROIT_AVANT
-
-		
-		LDR     R1, =DUREE*5
-wait7   SUBS    R1, #1
-        BNE     wait7
-
-		
-			
-		
-		; Avancement pendant une période (deux WAIT)
-		;BL	WAIT	; BL (Branchement vers le lien WAIT); possibilité de retour à la suite avec (BX LR)
-		;BL	WAIT
-		
-		; Rotation à droite de l'Evalbot pendant une demi-période (1 seul WAIT)
-		;BL	MOTEUR_DROIT_ARRIERE   ; MOTEUR_DROIT_INVERSE
-		;BL	WAIT
-
-
-        B       loop
+ALLUME_GAUCHE
+        LDR     R0, =GPIO_PORTF_BASE
+        MOV     R1, #PIN_LEFT       ; PIN_LEFT est 0x20
+        STR     R1, [R0, #0x3FC]
+		NOP
+		NOP
+		NOP
+		BX      LR
+ALLUME_DROITE
+        LDR     R0, =GPIO_PORTF_BASE
+        MOV     R1, #PIN_RIGHT       ; PIN_LEFT est 0x20
+        STR     R1, [R0, #0x3FC]
+		NOP
+		NOP
+		NOP
+		BX      LR
+LOOP_FIN
         END
