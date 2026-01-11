@@ -132,6 +132,8 @@ ACMD41_LOOP
         POP     {R4-R6, PC}
 
 SD_ReadSector
+		;R8 -> INDEX DE LA DANSE A LIRE
+		MOV 	R8, #0
         PUSH    {R4-R7, LR}
         MOV     R6, #0              
 RECHERCHE_STEP
@@ -173,8 +175,12 @@ NEXT_SECT
         B       READ_FAIL
 
 STEP_TROUVE
-        
-        ADD     R6, R6, #1         
+        SUBS    R8, R8, #1
+        BMI     CHARGE_DONNEES      
+        B       NEXT_SECT
+		
+CHARGE_DONNEES        
+		ADD     R6, R6, #1         
         MOV     R0, R6
         LSL     R0, R0, #9         
         BL      Read_Single_Block  

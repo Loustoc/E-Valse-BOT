@@ -1,1 +1,4 @@
 choreo.bin
+*.o
+/arm2/Listings
+/arm2/Objects
