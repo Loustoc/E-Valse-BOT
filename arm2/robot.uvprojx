@@ -10,7 +10,7 @@
       <TargetName>Target_1</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>6230000::V6.23::ARMCLANG</pCCUsed>
+      <pCCUsed>6240000::V6.24::ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -390,14 +390,29 @@
               <FilePath>.\Startup.s</FilePath>
             </File>
             <File>
+              <FileName>motor.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\motor.s</FilePath>
+            </File>
+            <File>
+              <FileName>switch.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\switch.s</FilePath>
+            </File>
+            <File>
+              <FileName>main.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\main.s</FilePath>
+            </File>
+            <File>
               <FileName>led.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\led.s</FilePath>
             </File>
             <File>
-              <FileName>motor.s</FileName>
+              <FileName>sd_driver.s</FileName>
               <FileType>2</FileType>
-              <FilePath>.\motor.s</FilePath>
+              <FilePath>.\sd_driver.s</FilePath>
             </File>
           </Files>
         </Group>

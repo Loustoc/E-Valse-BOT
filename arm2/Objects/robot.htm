@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\robot.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\robot.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6240002: Last Updated: Thu Dec 18 23:40:38 2025
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6240002: Last Updated: Sun Jan 11 23:33:31 2026
 <BR><P>
 <H3>Maximum Stack Usage =          0 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -13,7 +13,6 @@ Call chain for Maximum Stack Depth:</H3>
 Functions with no stack information
 </H3><UL>
  <LI><a href="#[0]">Reset_Handler</a>
- <LI><a href="#[4]">__main</a>
  <LI><a href="#[5]">MOTEUR_INIT</a>
  <LI><a href="#[6]">MOTEUR_DROIT_ON</a>
  <LI><a href="#[7]">MOTEUR_DROIT_OFF</a>
@@ -25,6 +24,14 @@ Functions with no stack information
  <LI><a href="#[d]">MOTEUR_GAUCHE_AVANT</a>
  <LI><a href="#[e]">MOTEUR_DROIT_INVERSE</a>
  <LI><a href="#[f]">MOTEUR_GAUCHE_INVERSE</a>
+ <LI><a href="#[10]">SWITCH_INIT</a>
+ <LI><a href="#[14]">READ_SWITCH</a>
+ <LI><a href="#[4]">__main</a>
+ <LI><a href="#[15]">L_LED_ON</a>
+ <LI><a href="#[13]">R_LED_ON</a>
+ <LI><a href="#[12]">SD_IndexDances</a>
+ <LI><a href="#[11]">SD_Init</a>
+ <LI><a href="#[16]">SD_ReadSector</a>
  <LI><a href="#[1]">NmiSR</a>
  <LI><a href="#[2]">FaultISR</a>
  <LI><a href="#[3]">IntDefaultHandler</a>
@@ -55,56 +62,67 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup.o(RESET)
 </UL>
-<P><STRONG><a name="[4]"></a>__main</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, led.o(.text))
-<BR><BR>[Calls]<UL><LI><a href="#[5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_INIT
-<LI><a href="#[8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_ON
-<LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_AVANT
-<LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_ARRIERE
-<LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_ON
-<LI><a href="#[7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_OFF
-<LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_AVANT
-<LI><a href="#[a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_ARRIERE
-</UL>
-<BR>[Called By]<UL><LI><a href="#[0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Handler
-</UL>
-
 <P><STRONG><a name="[5]"></a>MOTEUR_INIT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
-</UL>
 
-<P><STRONG><a name="[6]"></a>MOTEUR_DROIT_ON</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
-</UL>
+<P><STRONG><a name="[6]"></a>MOTEUR_DROIT_ON</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
 
-<P><STRONG><a name="[7]"></a>MOTEUR_DROIT_OFF</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
-</UL>
+<P><STRONG><a name="[7]"></a>MOTEUR_DROIT_OFF</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
 
-<P><STRONG><a name="[8]"></a>MOTEUR_GAUCHE_ON</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
-</UL>
+<P><STRONG><a name="[8]"></a>MOTEUR_GAUCHE_ON</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
 
 <P><STRONG><a name="[9]"></a>MOTEUR_GAUCHE_OFF</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
 
-<P><STRONG><a name="[a]"></a>MOTEUR_DROIT_ARRIERE</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
-</UL>
+<P><STRONG><a name="[a]"></a>MOTEUR_DROIT_ARRIERE</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
 
-<P><STRONG><a name="[b]"></a>MOTEUR_DROIT_AVANT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
-</UL>
+<P><STRONG><a name="[b]"></a>MOTEUR_DROIT_AVANT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
 
-<P><STRONG><a name="[c]"></a>MOTEUR_GAUCHE_ARRIERE</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
-</UL>
+<P><STRONG><a name="[c]"></a>MOTEUR_GAUCHE_ARRIERE</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
 
-<P><STRONG><a name="[d]"></a>MOTEUR_GAUCHE_AVANT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
-</UL>
+<P><STRONG><a name="[d]"></a>MOTEUR_GAUCHE_AVANT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
 
 <P><STRONG><a name="[e]"></a>MOTEUR_DROIT_INVERSE</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
 
 <P><STRONG><a name="[f]"></a>MOTEUR_GAUCHE_INVERSE</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
+
+<P><STRONG><a name="[10]"></a>SWITCH_INIT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, switch.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
+
+<P><STRONG><a name="[14]"></a>READ_SWITCH</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, switch.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
+
+<P><STRONG><a name="[4]"></a>__main</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, main.o(.text))
+<BR><BR>[Calls]<UL><LI><a href="#[16]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_ReadSector
+<LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init
+<LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_IndexDances
+<LI><a href="#[13]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;R_LED_ON
+<LI><a href="#[15]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;L_LED_ON
+<LI><a href="#[14]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;READ_SWITCH
+<LI><a href="#[10]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SWITCH_INIT
+</UL>
+<BR>[Called By]<UL><LI><a href="#[0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Handler
+</UL>
+
+<P><STRONG><a name="[15]"></a>L_LED_ON</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, led.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
+
+<P><STRONG><a name="[13]"></a>R_LED_ON</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, led.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
+
+<P><STRONG><a name="[12]"></a>SD_IndexDances</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, sd_driver.o(SD_DRIVER))
+<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
+
+<P><STRONG><a name="[11]"></a>SD_Init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, sd_driver.o(SD_DRIVER))
+<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
+
+<P><STRONG><a name="[16]"></a>SD_ReadSector</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, sd_driver.o(SD_DRIVER))
+<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
 <P>
 <H3>
 Local Symbols

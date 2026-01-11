@@ -5,11 +5,11 @@
 <h2>Tool Versions:</h2>
 IDE-Version: µVision V5.43.1.0
 Copyright (C) 2025 ARM Ltd and ARM Germany GmbH. All rights reserved.
-License Information: A pc1_nlg1_win10, A, LIC=----
+License Information: Lou Kail, ESIEE, LIC=----
  
 Tool Versions:
 Toolchain:       MDK-Lite  Version: 5.43.0.0
-Toolchain Path:  C:\Keil_v5\ARM\ARMCLANG\Bin
+Toolchain Path:  C:\Users\louka\AppData\Local\Keil_v5\ARM\ARMCLANG\Bin
 C Compiler:      ArmClang.exe V6.24
 Assembler:       Armasm.exe V6.24
 Linker/Locator:  ArmLink.exe V6.24
@@ -21,20 +21,31 @@ Target DLL:      lmidk-agdi.dll V???
 Dialog DLL:      TCM.DLL V1.56.6.0
  
 <h2>Project:</h2>
-C:\Users\pc1_nlg1_win10\Desktop\arm2\robot.uvprojx
-Project File Date:  12/18/2025
+C:\Users\louka\Documents\GitHub\E-Valse-BOT\arm2\robot.uvprojx
+Project File Date:  01/11/2026
 
 <h2>Output:</h2>
-*** Using Compiler 'V6.24', folder: 'C:\Keil_v5\ARM\ARMCLANG\Bin'
+*** Using Compiler 'V6.24', folder: 'C:\Users\louka\AppData\Local\Keil_v5\ARM\ARMCLANG\Bin'
 Rebuild target 'Target_1'
-assembling Startup.s...
+"main.s", line 66: Warning: A1581W: Added 2 bytes of padding at address 0x62
+   66 00000064   END
+0 Errors, 1 Warning
+assembling main.s...
 assembling motor.s...
-"led.s", line 59: Warning: A1876W: Use of '|' as a synonym for the :OR: operator is deprecated.
-   59 00000010         LDR     R0, =LED1 | LED2
+assembling switch.s...
+assembling Startup.s...
+"led.s", line 25: Warning: A1313W: Missing END directive at end of file
+   25 00000024 
 0 Errors, 1 Warning
 assembling led.s...
+"sd_driver.s", line 367: Warning: A1313W: Missing END directive at end of file
+  367 00000302 
+"sd_driver.s", line 367: Warning: A1581W: Added 2 bytes of padding at address 0x302
+  367 00000304 
+0 Errors, 2 Warnings
+assembling sd_driver.s...
 linking...
-Program Size: Code=1324 RO-data=0 RW-data=0 ZI-data=256  
+Program Size: Code=2152 RO-data=0 RW-data=84 ZI-data=256  
 ".\Objects\robot.axf" - 0 Error(s), 0 Warning(s).
 
 <h2>Software Packages used:</h2>
@@ -45,10 +56,10 @@ Package Vendor: Keil
                 Texas Instruments LM3S Series Device Support
 
 <h2>Collection of Component include folders:</h2>
-  C:/Keil_v5/ARM/Packs/Keil/LM3S_DFP/1.1.1/Device/Include
+  C:/Users/louka/AppData/Local/Arm/Packs/Keil/LM3S_DFP/1.1.1/Device/Include
 
 <h2>Collection of Component Files used:</h2>
-Build Time Elapsed:  00:00:00
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>
