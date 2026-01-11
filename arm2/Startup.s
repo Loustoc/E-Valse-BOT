@@ -14,7 +14,7 @@
 ; 
 ; THIS SOFTWARE IS PROVIDED "AS IS" AND WITH ALL FAULTS.
 ; NO WARRANTIES, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT
-; NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+; NOT LIMITED TO, IMPLIED WARRANTIy ES OF MERCHANTABILITY AND FITNESS FOR
 ; A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. TI SHALL NOT, UNDER ANY
 ; CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
 ; DAMAGES, FOR ANY REASON WHATSOEVER.
@@ -72,6 +72,8 @@ __heap_limit
 ;******************************************************************************
         AREA    RESET, CODE, READONLY
         THUMB
+			
+		IMPORT  SysTick_Handler
 
 ;******************************************************************************
 ;
@@ -95,7 +97,7 @@ __Vectors
         DCD     IntDefaultHandler           ; Debug monitor handler
         DCD     0                           ; Reserved
         DCD     IntDefaultHandler           ; PendSV Handler
-        DCD     IntDefaultHandler           ; SysTick Handler
+        DCD     SysTick_Handler           ; SysTick Handler
         DCD     IntDefaultHandler           ; GPIO Port A
         DCD     IntDefaultHandler           ; GPIO Port B
         DCD     IntDefaultHandler           ; GPIO Port C
