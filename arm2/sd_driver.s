@@ -1,6 +1,12 @@
-		AREA SD_DRIVER, CODE, READONLY, ALIGN=2
+		AREA SD_DATA, DATA, READWRITE
+DANCE_TABLE  SPACE 80               
+DANCE_COUNT  DCD 0                  
+
+        AREA SD_DRIVER, CODE, READONLY, ALIGN=2
         EXPORT SD_Init
         EXPORT SD_ReadSector
+        EXPORT SD_IndexDances
+		EXPORT DANCE_COUNT
 
 SSI0_BASE         EQU 0x40008000
 GPIO_PORTA_BASE   EQU 0x40004000
@@ -10,6 +16,45 @@ GPIO_PORTF_BASE EQU 0x40025000
 GPIO_PORTF_DATA   EQU 0x400253FC
 PA3_CS_ADDR       EQU 0x40004020
 RAM_BUF           EQU 0x20002000
+	
+SD_IndexDances
+        PUSH    {R4-R8, LR}
+        MOV     R6, #0             
+        MOV     R8, #0              
+        LDR     R7, =DANCE_TABLE
+
+SCAN_LOOP_INIT
+        MOV     R0, R6
+        LSL     R0, R0, #9          
+        BL      Read_Single_Block
+        CMP     R0, #0
+        BEQ     SCAN_NEXT           
+
+        LDR     R4, =RAM_BUF
+        LDRB    R0, [R4]
+        CMP     R0, #0x53           ; 'S'
+        BNE     SCAN_NEXT
+        LDRB    R0, [R4, #1]
+        CMP     R0, #0x54           ; 'T'
+        BNE     SCAN_NEXT
+        
+        ADD     R1, R6, #1
+        STR     R1, [R7, R8, LSL #2] ; DANCE_TABLE[R8] = R6 + 1
+        ADD     R8, R8, #1
+        
+        CMP     R8, #20             
+        BEQ     SCAN_FINISHED
+
+SCAN_NEXT
+        ADD     R6, R6, #1
+        LDR     R1, =5000           
+        CMP     R6, R1
+        BNE     SCAN_LOOP_INIT
+
+SCAN_FINISHED
+        LDR     R0, =DANCE_COUNT
+        STR     R8, [R0]           
+        POP     {R4-R8, PC}
 
 sd_spi_send
         PUSH    {R1, R2}
@@ -130,65 +175,25 @@ ACMD41_LOOP
         STR     R1, [R4]            
         MOV     R0, #1              
         POP     {R4-R6, PC}
-
 SD_ReadSector
-		;R8 -> INDEX DE LA DANSE A LIRE
-		MOV 	R8, #0
-        PUSH    {R4-R7, LR}
-        MOV     R6, #0              
-RECHERCHE_STEP
-        MOV     R0, R6              
-        LSL     R0, R0, #9          
+        PUSH    {R4-R8, LR}
+        MOV     R8, R0            
+        
+        LDR     R1, =DANCE_COUNT
+        LDR     R1, [R1]
+        CMP     R8, R1
+        BGE     READ_FAIL         
+
+        LDR     R1, =DANCE_TABLE
+        LDR     R6, [R1, R8, LSL #2] 
+
+        MOV     R0, R6
+        LSL     R0, R0, #9
         BL      Read_Single_Block
         CMP     R0, #1
-        BNE     NEXT_SECT 
-
+        BNE     READ_FAIL
 
         LDR     R4, =RAM_BUF
-        LDR     R5, =508           
-SCAN_LOOP
-        LDRB    R0, [R4]
-        CMP     R0, #0x53           ; 'S' ?
-        BNE     NEXT_BYTE
-        LDRB    R1, [R4, #1]
-        CMP     R1, #0x54           ; 'T' ?
-        BNE     NEXT_BYTE
-        LDRB    R1, [R4, #2]
-        CMP     R1, #0x45           ; 'E' ?
-        BNE     NEXT_BYTE
-        LDRB    R1, [R4, #3]
-        CMP     R1, #0x50           ; 'P' ?
-
-        BEQ     STEP_TROUVE
-
-NEXT_BYTE
-        ADD     R4, R4, #1
-        SUBS    R5, R5, #1
-        BNE     SCAN_LOOP
-        B       NEXT_SECT           
-
-NEXT_SECT
-        ADD     R6, R6, #1
-        LDR     R7, =10000          
-        CMP     R6, R7
-        BNE     RECHERCHE_STEP
-        B       READ_FAIL
-
-STEP_TROUVE
-        SUBS    R8, R8, #1
-        BMI     CHARGE_DONNEES      
-        B       NEXT_SECT
-		
-CHARGE_DONNEES        
-		ADD     R6, R6, #1         
-        MOV     R0, R6
-        LSL     R0, R0, #9         
-        BL      Read_Single_Block  
-        
-        CMP     R0, #1
-        BNE     READ_FAIL           
-
-        LDR     R4, =RAM_BUF       
         LDR     R5, =GPIO_PORTF_DATA
 
 FIND_START
@@ -261,7 +266,7 @@ APPLY   STR     R3, [R5]
 
 CHOREO_END
         MOV     R0, #1              
-        POP     {R4-R7, PC}
+        POP     {R4-R8, PC}
 
 READ_FAIL
         MOV     R0, #0
