@@ -409,6 +409,16 @@
               <FileType>2</FileType>
               <FilePath>.\danses_moves.s</FilePath>
             </File>
+            <File>
+              <FileName>button.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\button.s</FilePath>
+            </File>
+            <File>
+              <FileName>bumpers.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\bumpers.s</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

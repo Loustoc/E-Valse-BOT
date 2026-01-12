@@ -1,15 +1,15 @@
 		AREA    |.text|, CODE, READONLY
 			
 		IMPORT	MOTEUR_DROIT_ON				; activer le moteur droit
-		IMPORT  MOTEUR_DROIT_OFF			; déactiver le moteur droit
+		IMPORT  MOTEUR_DROIT_OFF			; d?activer le moteur droit
 		IMPORT  MOTEUR_DROIT_AVANT			; moteur droit tourne vers l'avant
-		IMPORT  MOTEUR_DROIT_ARRIERE		; moteur droit tourne vers l'arrière
+		IMPORT  MOTEUR_DROIT_ARRIERE		; moteur droit tourne vers l'arri?re
 		IMPORT  MOTEUR_DROIT_INVERSE		; inverse le sens de rotation du moteur droit
 		
 		IMPORT	MOTEUR_GAUCHE_ON			; activer le moteur gauche
-		IMPORT  MOTEUR_GAUCHE_OFF			; déactiver le moteur gauche
+		IMPORT  MOTEUR_GAUCHE_OFF			; d?activer le moteur gauche
 		IMPORT  MOTEUR_GAUCHE_AVANT			; moteur gauche tourne vers l'avant
-		IMPORT  MOTEUR_GAUCHE_ARRIERE		; moteur gauche tourne vers l'arrière
+		IMPORT  MOTEUR_GAUCHE_ARRIERE		; moteur gauche tourne vers l'arri?re
 		IMPORT  MOTEUR_GAUCHE_INVERSE		; inverse le sens de rotation du moteur gauche
 			
 		IMPORT  MOTEUR_SET_VITESSE      ; Import the function
@@ -31,26 +31,27 @@ VALSE
 		LDR     R0, =VITESSE_VALSE
         BL      MOTEUR_SET_VITESSE
 		
-		LDR     R0, #1000
+		LDR     R0, =1000
         BL      LED_SET_PERIOD
         
         BL  MOTEUR_GAUCHE_ON
+		BL 	MOTEUR_DROIT_ON
         BL  MOTEUR_GAUCHE_ARRIERE
         BL  MOTEUR_DROIT_AVANT
 
         LDR R1, =DUREE*21
-wait_1
+valse_w1
         SUBS R1, #1
-        BNE  wait_1
+        BNE  valse_w1
 		
         
         BL  MOTEUR_GAUCHE_AVANT
         BL  MOTEUR_DROIT_AVANT
 
         LDR R1, =DUREE*10
-wait_2
+valse_w2
         SUBS R1, #1
-        BNE  wait_2
+        BNE  valse_w2
 
 
 
@@ -58,9 +59,9 @@ wait_2
         BL  MOTEUR_GAUCHE_OFF
 
         LDR R1, =DUREE*10
-wait_3
+valse_w3
         SUBS R1, #1
-        BNE  wait_3
+        BNE  valse_w3
 
 		POP {LR}
         BX  LR
@@ -77,9 +78,9 @@ STAR
 		BL  MOTEUR_DROIT_AVANT
 	
         LDR R1, =DUREE*1
-wait10
+star_w1
         SUBS R1, #1
-        BNE  wait10
+        BNE  star_w1
    
    
    
@@ -87,9 +88,9 @@ wait10
 		BL  MOTEUR_DROIT_ARRIERE
 	
         LDR R1, =DUREE*1
-wait101
+star_w2
         SUBS R1, #1
-        BNE  wait101
+        BNE  star_w2
    
 		
 		BL  MOTEUR_DROIT_OFF
@@ -97,10 +98,14 @@ wait101
 		BL  MOTEUR_DROIT_ARRIERE
 
         LDR R1, =DUREE*3
-wait11
+star_w3
 		SUBS R1, #1
-		BNE  wait11
+		BNE  star_w3
 		BL  MOTEUR_DROIT_ON
+		
+		BL	MOTEUR_DROIT_OFF
+		BL 	MOTEUR_GAUCHE_OFF
+		
 		
 		
 		
@@ -118,9 +123,9 @@ CIRCLE_RIGHT
 		BL  MOTEUR_DROIT_AVANT
 	
         LDR R1, =DUREE*6
-wait10222
+cr_wait
         SUBS R1, #1
-        BNE  wait10222
+        BNE  cr_wait
 		
 		POP {LR}
         BX  LR
@@ -136,9 +141,9 @@ CIRCLE_LEFT
 		BL  MOTEUR_GAUCHE_AVANT
 	
         LDR R1, =DUREE*6
-wait19
+cl_wait
         SUBS R1, #1
-        BNE  wait19
+        BNE  cl_wait
 		
 		POP {LR}
         BX  LR
@@ -147,7 +152,7 @@ wait19
 
 
 ;DEMICIRCLE_RIGHT
-		EXPORT CIRCLE_RIGHT
+		EXPORT DEMICIRCLE_RIGHT
 DEMICIRCLE_RIGHT		
 		
 		PUSH {LR}
@@ -156,16 +161,16 @@ DEMICIRCLE_RIGHT
 		BL  MOTEUR_DROIT_AVANT
 	
         LDR R1, =DUREE*3
-wait220
+dcr_wait
         SUBS R1, #1
-        BNE  wait220
+        BNE  dcr_wait
 		
 		POP {LR}
         BX  LR
 		
 		
 ;DEMICIRCLE_LEFT
-		EXPORT CIRCLE_LEFT
+		EXPORT DEMICIRCLE_LEFT
 DEMICIRCLE_LEFT
 		
 		PUSH {LR}
@@ -174,9 +179,9 @@ DEMICIRCLE_LEFT
 		BL  MOTEUR_GAUCHE_AVANT
 	
         LDR R1, =DUREE*3
-wait192
+dcl_wait
         SUBS R1, #1
-        BNE  wait192
+        BNE  dcl_wait
 		
 		POP {LR}
         BX  LR
@@ -194,36 +199,36 @@ WALK
 		 BL  MOTEUR_DROIT_AVANT
 
          LDR R1, =DUREE*1
-wait33
+walk_w1
          SUBS R1, #1
-         BNE  wait33
+         BNE  walk_w1
 		 
 		 
 		BL  MOTEUR_DROIT_AVANT
 		BL  MOTEUR_GAUCHE_ARRIERE
 	
 		LDR R1, =(DUREE*3)/2
-wait119
+walk_w2
         SUBS R1, #1
-        BNE  wait119	
+        BNE  walk_w2	
 
 
 		 BL  MOTEUR_GAUCHE_AVANT
 		 BL  MOTEUR_DROIT_AVANT
 
          LDR R1, =DUREE*1
-wait332
+walk_w3
          SUBS R1, #1
-         BNE  wait332
+         BNE  walk_w3
 		 
 		 
 		BL  MOTEUR_DROIT_ARRIERE
 		BL  MOTEUR_GAUCHE_AVANT
 	
 		LDR R1, =(DUREE*3)/2
-wait1129
+walk_w4
         SUBS R1, #1
-        BNE  wait1129	
+        BNE  walk_w4	
 		
 		
 		
@@ -237,7 +242,7 @@ wait1129
 		
 		
 ;WALK ON BACK
-		EXPORT WALK
+		EXPORT WALK_BACK
 WALK_BACK
 		PUSH {LR}
 
@@ -246,36 +251,36 @@ WALK_BACK
 		 BL  MOTEUR_DROIT_ARRIERE
 
          LDR R1, =DUREE*1
-wait44
+wb_w1
          SUBS R1, #1
-         BNE  wait44
+         BNE  wb_w1
 		 
 		 
 		BL  MOTEUR_DROIT_ARRIERE
 		BL  MOTEUR_GAUCHE_AVANT
 	
 		LDR R1, =(DUREE*3)/2
-wait88
+wb_w2
         SUBS R1, #1
-        BNE  wait88	
+        BNE  wb_w2	
 
 
 		 BL  MOTEUR_GAUCHE_ARRIERE
 		 BL  MOTEUR_DROIT_ARRIERE
 
          LDR R1, =DUREE*1
-wait66
+wb_w3
          SUBS R1, #1
-         BNE  wait66
+         BNE  wb_w3
 		 
 		 
 		BL  MOTEUR_DROIT_AVANT
 		BL  MOTEUR_GAUCHE_ARRIERE
 	
 		LDR R1, =(DUREE*3)/2
-wait78
+wb_w4
         SUBS R1, #1
-        BNE  wait78	
+        BNE  wb_w4	
 		
 		
 		POP {LR}
@@ -293,18 +298,18 @@ FRONTBACK
 		BL  MOTEUR_GAUCHE_AVANT
 	
 		LDR R1, =DUREE*1
-wait758
+fb_w1
         SUBS R1, #1
-        BNE  wait758	
+        BNE  fb_w1	
 		
 		
 		BL  MOTEUR_DROIT_ARRIERE
 		BL  MOTEUR_GAUCHE_ARRIERE
 	
 		LDR R1, =DUREE*1
-wait748
+fb_w2
         SUBS R1, #1
-        BNE  wait748	
+        BNE  fb_w2	
 
 
 
@@ -320,9 +325,9 @@ FRONT
 		BL  MOTEUR_DROIT_ARRIERE
 	
         LDR R1, =DUREE*4
-wait10232
+front_w
         SUBS R1, #1
-        BNE  wait10232
+        BNE  front_w
 		
 		
 		POP {LR}
@@ -336,9 +341,9 @@ FRONTSHORT
 		BL  MOTEUR_DROIT_ARRIERE
 	
         LDR R1, =DUREE*2
-wait102323
+fs_wait
         SUBS R1, #1
-        BNE  wait102323
+        BNE  fs_wait
 		
 		
 		POP {LR}
@@ -353,8 +358,11 @@ ITALODISCO
 		LDR     R0, =VITESSE_DISCO
         BL      MOTEUR_SET_VITESSE
 		
-		LDR     R0, #1000
+		LDR     R0, =487
         BL      LED_SET_PERIOD
+		
+		BL MOTEUR_GAUCHE_ON
+		BL MOTEUR_DROIT_ON
 
 		
 		BL FRONTBACK
@@ -414,6 +422,9 @@ ITALODISCO
 		BL MOTEUR_DROIT_OFF
 		BL FRONTBACK
 		BL FRONTBACK
+		
+		BL MOTEUR_GAUCHE_OFF
+		BL MOTEUR_DROIT_OFF
 		
 		
 		POP {LR}

@@ -17,3 +17,11 @@ arm2/Objects/robot_Target_1.dep
 arm2/Objects/startup.o
 *.o
 arm2/robot.uvguix.pc1_nlg1_win10
+arm2/Objects/led.o
+arm2/Objects/motor.o
+arm2/Objects/robot.axf
+arm2/Objects/robot.build_log.htm
+arm2/Objects/robot.htm
+arm2/Objects/robot.lnp
+arm2/Objects/robot_Target_1.dep
+arm2/Objects/startup.o

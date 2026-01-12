@@ -1,69 +1,164 @@
-        ;; RK - EvalBot (Cortex-M3 TI Stellaris)
-        ;; Blink LED1 (PF4) and LED2 (PF5) alternately
+;; EvalBot - Dancing Robot
+        ;; Wait for input:
+        ;;   - Bumper Left (PE1) = cycle LED speed (1-5)
+        ;;   - Button 1 (SW1/PD6) = VALSE
+        ;;   - Button 2 (SW2/PD7) = ITALODISCO
+        ;;
+        ;; While waiting: both LEDs blink together
+        ;; While dancing: LEDs alternate
 
-        AREA |.text|, CODE, READONLY
+        AREA    |.text|, CODE, READONLY
         ENTRY
-        EXPORT __main
+        EXPORT  __main
 
-;----------------------------
-; Peripheral base addresses
-;----------------------------
+        IMPORT  MOTEUR_INIT
+        IMPORT  LED_INIT
+        IMPORT  LED_CYCLE_SPEED
+        IMPORT  LED_SET_MODE
+        IMPORT  BUMPER_INIT
+        IMPORT  BUMPER_LEFT_PRESSED
+        IMPORT  BUTTON_INIT
+        IMPORT  BUTTON1_PRESSED
+        IMPORT  BUTTON2_PRESSED
+        IMPORT  ITALODISCO
+        IMPORT  VALSE
 
-		;; The IMPORT command specifies that a symbol is defined in a shared object at runtime.
-		IMPORT	MOTEUR_INIT					; initialise les moteurs (configure les pwms + GPIO)
-		
-		IMPORT	MOTEUR_DROIT_ON				; activer le moteur droit
-		IMPORT  MOTEUR_DROIT_OFF			; déactiver le moteur droit
-		IMPORT  MOTEUR_DROIT_AVANT			; moteur droit tourne vers l'avant
-		IMPORT  MOTEUR_DROIT_ARRIERE		; moteur droit tourne vers l'arrière
-		IMPORT  MOTEUR_DROIT_INVERSE		; inverse le sens de rotation du moteur droit
-		
-		IMPORT	MOTEUR_GAUCHE_ON			; activer le moteur gauche
-		IMPORT  MOTEUR_GAUCHE_OFF			; déactiver le moteur gauche
-		IMPORT  MOTEUR_GAUCHE_AVANT			; moteur gauche tourne vers l'avant
-		IMPORT  MOTEUR_GAUCHE_ARRIERE		; moteur gauche tourne vers l'arrière
-		IMPORT  MOTEUR_GAUCHE_INVERSE		; inverse le sens de rotation du moteur gauche
-			
-		IMPORT  MOTEUR_SET_VITESSE      ; Import the function
-			
-        IMPORT  LED_INIT                ; Initialize LEDs + start SysTick
-        IMPORT  LED_SET_PERIOD          ; Change blink speed
-			
-		IMPORT ITALODISCO
-		IMPORT VALSE
+;; LED modes
+MODE_ALTERNATE  EQU     0
+MODE_TOGETHER   EQU     1
 
+;; ============================================
+;; Main program
+;; ============================================
+__main
+        BL      MOTEUR_INIT
+        BL      LED_INIT
+        BL      BUMPER_INIT
+        BL      BUTTON_INIT
+        
+        ; Set LED mode to "together" for waiting
+        MOV     R0, #MODE_TOGETHER
+        BL      LED_SET_MODE
 
-SYSCTL_PERIPH_GPIOF EQU 0x400FE108
-GPIO_PORTF_BASE     EQU 0x40025000
+;; ============================================
+;; Wait loop - wait for button or bumper
+;; ============================================
+wait_input
+        ; Small delay to avoid too fast polling
+        LDR     R1, =0x1000
+poll_delay
+        SUBS    R1, #1
+        BNE     poll_delay
 
-; GPIO offsets
-GPIO_O_DIR          EQU 0x400   ; Direction
-GPIO_O_DR2R         EQU 0x500   ; 2-mA drive
-GPIO_O_DEN          EQU 0x51C   ; Digital Enable
+        ; Check bumper left (PE1) - cycle LED speed
+        BL      BUMPER_LEFT_PRESSED
+        CMP     R0, #1
+        BEQ     do_cycle_speed
+        
+        ; Check button 1 (SW1/PD6) - VALSE
+        BL      BUTTON1_PRESSED
+        CMP     R0, #1
+        BEQ     do_valse
+        
+        ; Check button 2 (SW2/PD7) - ITALODISCO
+        BL      BUTTON2_PRESSED
+        CMP     R0, #1
+        BEQ     do_disco
+        
+        ; Nothing pressed, keep waiting
+        B       wait_input
 
-; Delay
-DUREE               EQU 0x001FFFFF
-	
-VITESSE_VALSE   EQU     0x155           ; Slow
-VITESSE_DISCO   EQU     0x005           ; Fast
+;; ============================================
+;; Bumper left pressed - cycle LED speed
+;; ============================================
+do_cycle_speed
+        BL      LED_CYCLE_SPEED
+        
+        ; Wait for release
+wait_bumper_release
+        BL      BUMPER_LEFT_PRESSED
+        CMP     R0, #1
+        BEQ     wait_bumper_release
+        
+        ; Longer debounce for bumpers
+        BL      debounce_long
+        
+        B       wait_input
 
+;; ============================================
+;; Button 1 pressed - VALSE
+;; ============================================
+do_valse
+        ; Wait for release first
+wait_btn1_release
+        BL      BUTTON1_PRESSED
+        CMP     R0, #1
+        BEQ     wait_btn1_release
+        
+        BL      debounce
+        
+        ; Set LED mode to alternate for dancing
+        MOV     R0, #MODE_ALTERNATE
+        BL      LED_SET_MODE
+        
+        ; Run VALSE
+        BL      VALSE
+        
+        ; Back to together mode for waiting
+        MOV     R0, #MODE_TOGETHER
+        BL      LED_SET_MODE
+        
+        ; Back to waiting
+        B       wait_input
 
-;----------------------------
-; Main program
-;----------------------------
-__main		
-		BL      MOTEUR_INIT
-        BL      LED_INIT 
-		
-;----------------------------
-; Main loop
-;----------------------------
-loop
+;; ============================================
+;; Button 2 pressed - ITALODISCO
+;; ============================================
+do_disco
+        ; Wait for release first
+wait_btn2_release
+        BL      BUTTON2_PRESSED
+        CMP     R0, #1
+        BEQ     wait_btn2_release
+        
+        BL      debounce
+        
+        ; Set LED mode to alternate for dancing
+        MOV     R0, #MODE_ALTERNATE
+        BL      LED_SET_MODE
+        
+        ; Run ITALODISCO
+        BL      ITALODISCO
+        
+        ; Back to together mode for waiting
+        MOV     R0, #MODE_TOGETHER
+        BL      LED_SET_MODE
+        
+        ; Back to waiting
+        B       wait_input
 
-   
-		 BL ITALODISCO
-		;BL VALSE
+;; ============================================
+;; Debounce delay (~50ms) for buttons
+;; ============================================
+debounce
+        PUSH    {R1, LR}
+        LDR     R1, =0x50000
+deb_loop
+        SUBS    R1, #1
+        BNE     deb_loop
+        POP     {R1, LR}
+        BX      LR
 
-        B       loop
-		
+;; ============================================
+;; Debounce delay (~200ms) for bumpers
+;; ============================================
+debounce_long
+        PUSH    {R1, LR}
+        LDR     R1, =0x200000
+deb_long_loop
+        SUBS    R1, #1
+        BNE     deb_long_loop
+        POP     {R1, LR}
+        BX      LR
+
         END
