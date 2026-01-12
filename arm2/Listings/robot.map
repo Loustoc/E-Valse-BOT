@@ -5,12 +5,16 @@ Component: Arm Compiler for Embedded 6.24 Tool: armlink [5f371500]
 Section Cross References
 
     startup.o(RESET) refers to startup.o(STACK) for StackMem
+    startup.o(RESET) refers to led.o(.text) for SysTick_Handler
     startup.o(RESET) refers to main.o(.text) for __main
-    main.o(.text) refers (Special) to sd_driver.o(SD_DATA) for DANCE_COUNT
-    main.o(.text) refers to switch.o(.text) for SWITCH_INIT
-    main.o(.text) refers to sd_driver.o(SD_DRIVER) for SD_Init
-    main.o(.text) refers to led.o(.text) for R_LED_ON
-    sd_driver.o(SD_DRIVER) refers to sd_driver.o(SD_DATA) for DANCE_TABLE
+    main.o(.text) refers to motor.o(.text) for MOTEUR_INIT
+    main.o(.text) refers to led.o(.text) for LED_INIT
+    main.o(.text) refers to bumpers.o(.text) for BUMPER_INIT
+    main.o(.text) refers to button.o(.text) for BUTTON_INIT
+    main.o(.text) refers to danses_moves.o(.text) for VALSE
+    led.o(.text) refers to led.o(.data) for TICK_MS
+    danses_moves.o(.text) refers (Special) to led.o(.text) for LED_INIT
+    danses_moves.o(.text) refers (Special) to motor.o(.text) for MOTEUR_DROIT_INVERSE
 
 
 ==============================================================================
@@ -31,6 +35,9 @@ Image Symbol Table
     Symbol Name                              Value     Ov Type        Size  Object(Section)
 
     Startup.s                                0x00000000   Number         0  startup.o ABSOLUTE
+    bumpers.s                                0x00000000   Number         0  bumpers.o ABSOLUTE
+    button.s                                 0x00000000   Number         0  button.o ABSOLUTE
+    danses_moves.s                           0x00000000   Number         0  danses_moves.o ABSOLUTE
     led.s                                    0x00000000   Number         0  led.o ABSOLUTE
     main.s                                   0x00000000   Number         0  main.o ABSOLUTE
     motor.s                                  0x00000000   Number         0  motor.o ABSOLUTE
@@ -149,11 +156,6 @@ Image component sizes
       2152        814          0         84        256       1776   ELF Image Totals
       2152        814          0         84          0          0   ROM Totals
 
-==============================================================================
-
-    Total RO  Size (Code + RO Data)                 2152 (   2.10kB)
-    Total RW  Size (RW Data + ZI Data)               340 (   0.33kB)
-    Total ROM Size (Code + RO Data + RW Data)       2236 (   2.18kB)
 
 ==============================================================================
 

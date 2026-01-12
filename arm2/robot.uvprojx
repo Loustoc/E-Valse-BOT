@@ -314,7 +314,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>2</Optim>
+            <Optim>1</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -337,8 +337,8 @@
             <v6WtE>0</v6WtE>
             <v6Rtti>0</v6Rtti>
             <VariousControls>
-              <MiscControls></MiscControls>
-              <Define></Define>
+              <MiscControls>-g</MiscControls>
+              <Define>PART_LM3S9B92</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
@@ -406,13 +406,34 @@
             </File>
             <File>
               <FileName>led.s</FileName>
+              <FileName>main.s</FileName>
               <FileType>2</FileType>
-              <FilePath>.\led.s</FilePath>
+              <FilePath>.\main.s</FilePath>
             </File>
             <File>
               <FileName>sd_driver.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\sd_driver.s</FilePath>
+            </File>
+            <File>
+              <FileName>led.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\led.s</FilePath>
+            </File>
+            <File>
+              <FileName>danses_moves.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\danses_moves.s</FilePath>
+            </File>
+            <File>
+              <FileName>button.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\button.s</FilePath>
+            </File>
+            <File>
+              <FileName>bumpers.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\bumpers.s</FilePath>
             </File>
           </Files>
         </Group>
