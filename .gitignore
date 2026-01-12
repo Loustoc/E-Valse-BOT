@@ -1,3 +1,7 @@
+choreo.bin
+*.o
+/arm2/Listings
+/arm2/Objects
 arm2/Objects/bumper.o
 arm2/Objects/button.o
 arm2/Objects/danses_moves.o

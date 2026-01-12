@@ -390,14 +390,30 @@
               <FilePath>.\Startup.s</FilePath>
             </File>
             <File>
+              <FileName>motor.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\motor.s</FilePath>
+            </File>
+            <File>
+              <FileName>switch.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\switch.s</FilePath>
+            </File>
+            <File>
               <FileName>main.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\main.s</FilePath>
             </File>
             <File>
-              <FileName>motor.s</FileName>
+              <FileName>led.s</FileName>
+              <FileName>main.s</FileName>
               <FileType>2</FileType>
-              <FilePath>.\motor.s</FilePath>
+              <FilePath>.\main.s</FilePath>
+            </File>
+            <File>
+              <FileName>sd_driver.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\sd_driver.s</FilePath>
             </File>
             <File>
               <FileName>led.s</FileName>
