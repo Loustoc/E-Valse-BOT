@@ -58,7 +58,6 @@
         IMPORT  SD_Init
         IMPORT  SD_ReadSector
         IMPORT  SD_IndexDances
-        IMPORT  SD_WriteEmbeddedDances
 
 ; modes des LEDs pour savoir l'etat du robot
 MODE_ALTERNATE  EQU     0               ; les 2 LEDs alternent
@@ -93,10 +92,7 @@ __main
         CMP     R0, #1
         BNE     sd_not_available
 
-        ; carte SD ok, on ecrit les danses embedded dessus
-        BL      SD_WriteEmbeddedDances
-
-        ; on indexe les danses sur la carte
+        ; on indexe les danses sur la carte (la carte est deja prete)
         BL      SD_IndexDances
         LDR     R0, =SD_AVAILABLE
         MOV     R1, #1

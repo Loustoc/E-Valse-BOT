@@ -395,11 +395,6 @@
               <FilePath>.\motor.s</FilePath>
             </File>
             <File>
-              <FileName>switch.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>.\switch.s</FilePath>
-            </File>
-            <File>
               <FileName>main.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\main.s</FilePath>
@@ -428,16 +423,6 @@
               <FileName>bumpers.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\bumpers.s</FilePath>
-            </File>
-            <File>
-              <FileName>sd_writer.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>.\sd_writer.s</FilePath>
-            </File>
-            <File>
-              <FileName>embedded_dances.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>.\embedded_dances.s</FilePath>
             </File>
           </Files>
         </Group>
