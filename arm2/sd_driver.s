@@ -168,7 +168,7 @@ CMD0_SEND
         B       SD_INIT_FAIL        ; timeout - no SD card
 CMD0_OK
 
-        LDR     R5, =1000           ; ACMD41 retry limit (needs more attempts)
+        LDR     R5, =50           ; ACMD41 retry limit (needs more attempts)
 ACMD41_LOOP
         MOV     R0, #0x41
         BL      sd_spi_send

@@ -27,14 +27,14 @@ DANCE_DURATION  EQU     90000           ; 90 seconds in milliseconds (all dances
 		EXPORT  VALSE
 
 VALSE
-		PUSH    {R4-R6, LR}
+		PUSH    {R4-R7, LR}
 
 		;; R4 = duration in milliseconds
 		LDR     R4, =DANCE_DURATION
 
-		;; R6 = pointer to TICK_MS, R5 = start time
-		LDR     R6, =TICK_MS
-		LDR     R5, [R6]            ; R5 = start tick
+		;; R7 = pointer to TICK_MS, R5 = start time (R7 safe from motor.s)
+		LDR     R7, =TICK_MS
+		LDR     R5, [R7]            ; R5 = start tick
 
 		;; Set speed and LED
 		LDR     R0, =VITESSE_VALSE
@@ -70,7 +70,7 @@ valse_w3
 		BNE     valse_w3
 
 		;; Check if duration reached
-		LDR     R0, [R6]            ; Current tick
+		LDR     R0, [R7]            ; Current tick
 		SUB     R0, R0, R5          ; Elapsed = current - start
 		CMP     R0, R4              ; Compare with duration (ms)
 		BLT     valse_start         ; Continue if not reached
@@ -79,7 +79,7 @@ valse_w3
 		BL      MOTEUR_GAUCHE_OFF
 		BL      MOTEUR_DROIT_OFF
 
-		POP     {R4-R6, LR}
+		POP     {R4-R7, LR}
 		BX      LR
 		
 		
@@ -368,14 +368,14 @@ fs_wait
 		
 		EXPORT ITALODISCO
 ITALODISCO
-		PUSH    {R4-R6, LR}
+		PUSH    {R4-R7, LR}
 
 		;; R4 = duration in milliseconds
 		LDR     R4, =DANCE_DURATION
 
-		;; R6 = pointer to TICK_MS, R5 = start time
-		LDR     R6, =TICK_MS
-		LDR     R5, [R6]            ; R5 = start tick
+		;; R7 = pointer to TICK_MS, R5 = start time (R7 safe from motor.s)
+		LDR     R7, =TICK_MS
+		LDR     R5, [R7]            ; R5 = start tick
 
 		LDR     R0, =VITESSE_DISCO
 		BL      MOTEUR_SET_VITESSE
@@ -388,13 +388,7 @@ disco_start
 		BL      MOTEUR_GAUCHE_ON
 		BL      MOTEUR_DROIT_ON
 		BL      MOTEUR_GAUCHE_AVANT
-		BL      MOTEUR_DROIT_AVANT
-
-		LDR     R1, =DUREE*2
-disco_test_w1
-		SUBS    R1, #1
-		BNE     disco_test_w1
-		
+		BL      MOTEUR_DROIT_AVANT	
 		
 		BL FRONTBACK
 		BL FRONTBACK
@@ -454,7 +448,7 @@ disco_test_w1
 		BL FRONTBACK
 
 		;; Check if duration reached
-		LDR     R0, [R6]            ; Current tick
+		LDR     R0, [R7]            ; Current tick
 		SUB     R0, R0, R5          ; Elapsed = current - start
 		CMP     R0, R4              ; Compare with duration (ms)
 		BLT     disco_start         ; Continue if not reached
@@ -463,7 +457,7 @@ disco_test_w1
 		BL      MOTEUR_GAUCHE_OFF
 		BL      MOTEUR_DROIT_OFF
 
-		POP     {R4-R6, LR}
+		POP     {R4-R7, LR}
 		BX      LR
 
 		END
