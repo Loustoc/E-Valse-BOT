@@ -30,7 +30,7 @@ SSI0_BASE         EQU 0x40008000        ; base du module SPI
 GPIO_PORTA_BASE   EQU 0x40004000        ; GPIO port A pour CS
 PA3_CS_ADDR       EQU 0x40004020        ; adresse du pin CS (PA3)
 RAM_BUF           EQU 0x20002000        ; buffer en RAM pour lire les secteurs
-DANCE_DURATION    EQU 90000             ; 90 secondes en ms
+DANCE_DURATION    EQU 60000             ; 60 secondes en ms
 	
 ; SD_IndexDances: scanne les premiers secteurs pour trouver les danses
 ; cherche le magic "ST" (STEP) au debut de chaque header
@@ -230,11 +230,13 @@ SD_ReadSector
         PUSH    {R4-R11, LR}
         MOV     R8, R0                  ; R8 = index de la danse
 
-        ; check si l'index est valide
+        ; check si l'index est valide (on inverse la condition car READ_FAIL est trop loin)
         LDR     R1, =DANCE_COUNT
         LDR     R1, [R1]
         CMP     R8, R1
-        BGE     READ_FAIL
+        BLT     index_ok
+        B       READ_FAIL
+index_ok
 
         ; recupere le numero de secteur des moves
         LDR     R1, =DANCE_TABLE
@@ -272,7 +274,7 @@ SD_ReadSector
 
         LDR     R4, =RAM_BUF            ; R4 pointe vers les moves
 
-        ; setup du timer pour limiter a 90 sec
+        ; setup du timer pour limiter a 60 sec
         LDR     R9, =TICK_MS
         LDR     R10, [R9]               ; R10 = temps de depart
         LDR     R11, =DANCE_DURATION
@@ -281,15 +283,15 @@ SD_ReadSector
 ; format: 2 bytes par move [moteur][duree]
 ; bits 3-2 = moteur gauche (00=off, 01=avant, 10=arriere)
 ; bits 1-0 = moteur droit (idem)
-; fin = 0xFF 0xFF
+; fin = 0xFF 0xFF, puis on recommence jusqu'a 60s
 CHOREO_EXEC
         ; lit le byte moteur
         LDRB    R0, [R4], #1
         CMP     R0, #0xFF
         BNE     choreo_not_end
         LDRB    R1, [R4]
-        CMP     R1, #0xFF               ; 0xFF 0xFF = fin
-        BEQ     CHOREO_END
+        CMP     R1, #0xFF               ; 0xFF 0xFF = fin de sequence
+        BEQ     choreo_check_loop       ; verifie si on doit boucler
 choreo_not_end
         CMP     R0, #0x00               ; ignore les zeros (padding)
         BEQ     CHOREO_EXEC
@@ -356,12 +358,22 @@ DANCE_DELAY
         SUBS    R6, R6, #1
         BNE     DANCE_DELAY
 
-        ; check si on a depasse 90 secondes
+        ; check si on a depasse 60 secondes
         LDR     R0, [R9]
         SUB     R0, R0, R10
         CMP     R0, R11
         BGE     CHOREO_END
 
+        B       CHOREO_EXEC
+
+; fin de sequence, on verifie si on doit recommencer
+choreo_check_loop
+        LDR     R0, [R9]
+        SUB     R0, R0, R10
+        CMP     R0, R11
+        BGE     CHOREO_END              ; 60s atteintes, on arrete
+        ; sinon on recommence depuis le debut
+        LDR     R4, =RAM_BUF
         B       CHOREO_EXEC
 
 CHOREO_END
@@ -463,23 +475,5 @@ RSB_E_OUT
         STR     R0, [R4]            ; CS high
         MOV     R0, #0              ; erreur
         POP     {R4-R7, PC}
-
-; fonctions de delai (pas utilisees pour l'instant)
-VariableDelay
-        PUSH    {R7}
-        LDR     R7, =100000
-        MUL     R7, R7, R2
-VD_LP   SUBS    R7, R7, #1
-        BNE     VD_LP
-        POP     {R7}
-        BX      LR
-
-ShortPause
-        PUSH    {R7}
-        LDR     R7, =400000
-SP_LP   SUBS    R7, R7, #1
-        BNE     SP_LP
-        POP     {R7}
-        BX      LR
 
         END

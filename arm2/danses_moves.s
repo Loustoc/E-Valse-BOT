@@ -1,5 +1,5 @@
 ; fichier avec toutes les fonctions de danse
-; chaque danse dure 90 secondes max grace au timer TICK_MS
+; chaque danse dure 60 secondes max grace au timer TICK_MS
 
 		AREA    |.text|, CODE, READONLY
 
@@ -27,7 +27,7 @@ DUREE           EQU 0x001FFFFF          ; duree de base pour les boucles d'atten
 
 VITESSE_VALSE   EQU     0x155           ; vitesse lente pour la valse
 VITESSE_DISCO   EQU     0x005           ; vitesse rapide pour l'italodisco
-DANCE_DURATION  EQU     90000           ; 90 secondes en ms pour toutes les danses
+DANCE_DURATION  EQU     60000           ; 60 secondes en ms pour toutes les danses
 
 		EXPORT  VALSE
 
@@ -79,7 +79,7 @@ valse_w3
 		SUBS    R1, #1
 		BNE     valse_w3
 
-		; check si on a atteint 90 secondes
+		; check si on a atteint 60 secondes
 		LDR     R0, [R7]            ; tick actuel
 		SUB     R0, R0, R5          ; temps ecoule = actuel - depart
 		CMP     R0, R4
@@ -355,61 +355,6 @@ fs_wait
 		POP {LR}
         BX  LR
 
-		
-; DEBUG_PAUSE: pour debugger, arrete les moteurs 3 sec avec LED rapide
-; sauvegarde et restaure l'etat des moteurs
-DBG_PWMENABLE   EQU     0x40028008      ; registre PWM enable
-DBG_DIR_RIGHT   EQU     0x40007008      ; direction moteur droit
-DBG_DIR_LEFT    EQU     0x40027008      ; direction moteur gauche
-
-DEBUG_PAUSE
-		PUSH    {R8-R10, LR}
-
-		; sauvegarde l'etat des moteurs (on/off)
-		LDR     R0, =DBG_PWMENABLE
-		LDR     R8, [R0]
-
-		; sauvegarde direction moteur droit
-		LDR     R0, =DBG_DIR_RIGHT
-		LDR     R9, [R0]
-
-		; sauvegarde direction moteur gauche
-		LDR     R0, =DBG_DIR_LEFT
-		LDR     R10, [R0]
-
-		; arrete les deux moteurs
-		BL      MOTEUR_GAUCHE_OFF
-		BL      MOTEUR_DROIT_OFF
-
-		; LED clignote vite pour montrer qu'on est en pause
-		MOV     R0, #50
-		BL      LED_SET_PERIOD
-
-		; on attend 3 secondes
-		LDR     R1, =0x900000
-dbg_wait
-		SUBS    R1, #1
-		BNE     dbg_wait
-
-		; remet la LED normale
-		LDR     R0, =487
-		BL      LED_SET_PERIOD
-
-		; restaure direction moteur droit
-		LDR     R0, =DBG_DIR_RIGHT
-		STR     R9, [R0]
-
-		; restaure direction moteur gauche
-		LDR     R0, =DBG_DIR_LEFT
-		STR     R10, [R0]
-
-		; restaure l'etat on/off des moteurs
-		LDR     R0, =DBG_PWMENABLE
-		STR     R8, [R0]
-
-		POP     {R8-R10, LR}
-		BX      LR
-
 ; ITALODISCO: danse rapide avec plein de figures enchainees
 ; meme principe que VALSE pour le timer avec R7
 		EXPORT ITALODISCO
@@ -489,7 +434,7 @@ disco_start
 		BL      FRONTBACK
 		BL      FRONTBACK
 
-		; check si on a atteint 90 secondes
+		; check si on a atteint 60 secondes
 		LDR     R0, [R7]
 		SUB     R0, R0, R5
 		CMP     R0, R4

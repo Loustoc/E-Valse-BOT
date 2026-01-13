@@ -52,7 +52,6 @@ LED_MODE        DCD     2               ; mode par defaut
         EXPORT  LED_INIT
         EXPORT  LED_SET_PERIOD
         EXPORT  LED_CYCLE_SPEED
-        EXPORT  LED_GET_MULTIPLIER
         EXPORT  LED_SET_MODE
         EXPORT  TICK_MS
 
@@ -307,12 +306,12 @@ LED_SET_PERIOD
         BX      LR
 
 ; LED_CYCLE_SPEED: cycle le multiplicateur 1->2->3->4->5->1
-; utilise par le bumper gauche
+; bumper gauche pour accelerer les LEDs
 LED_CYCLE_SPEED
-        PUSH    {R1, LR}
+        PUSH    {R1-R2, LR}
 
-        LDR     R0, =LED_MULTIPLIER
-        LDR     R1, [R0]
+        LDR     R2, =LED_MULTIPLIER
+        LDR     R1, [R2]
 
         ADD     R1, R1, #1
         CMP     R1, #6
@@ -320,16 +319,10 @@ LED_CYCLE_SPEED
         MOV     R1, #1
 
 cycle_store
-        STR     R1, [R0]
+        STR     R1, [R2]
         MOV     R0, R1
 
-        POP     {R1, LR}
-        BX      LR
-
-; LED_GET_MULTIPLIER: retourne le multiplicateur actuel
-LED_GET_MULTIPLIER
-        LDR     R0, =LED_MULTIPLIER
-        LDR     R0, [R0]
+        POP     {R1-R2, LR}
         BX      LR
 
 ; LED_SET_MODE: change le mode des LEDs (0-3)

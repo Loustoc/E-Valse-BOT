@@ -1,6 +1,38 @@
 ; prog principal du robot danseur
 ; SW1/SW2 pour danses, bumpers pour controle
 
+; memo des instructions ARM utilisees dans le projet:
+;
+; MOV Rd, #imm       met une valeur dans un registre
+; LDR Rd, =label     charge l'adresse d'un label
+; LDR Rd, [Rn]       lit la memoire a l'adresse Rn
+; STR Rs, [Rn]       ecrit en memoire a l'adresse Rn
+; LDRB/STRB          pareil mais juste 1 byte
+;
+; ADD Rd, Rn, Rm     addition
+; SUB Rd, Rn, Rm     soustraction
+; SUBS               soustraction + maj des flags
+; MUL Rd, Rn, Rm     multiplication
+;
+; CMP Rn, Rm         compare et met a jour les flags
+; TST Rn, #imm       teste des bits (AND sans resultat)
+;
+; B label            saut inconditionnel
+; BL label           appel de fonction
+; BX LR              retour de fonction
+; BEQ/BNE            saut si egal/different
+; BLT/BGE            saut si plus petit/plus grand
+;
+; PUSH {regs}        sauve les registres sur la pile
+; POP {regs}         restaure les registres
+;
+; ORR Rd, Rn, #imm   OU logique (met des bits a 1)
+; BIC Rd, Rn, #imm   efface des bits
+; EOR Rd, Rn, #imm   XOR (inverse des bits)
+; LSL/LSR            decalage gauche/droite
+;
+; NOP                ne fait rien (delai)
+
         AREA    |.text|, CODE, READONLY
         ENTRY
         EXPORT  __main
