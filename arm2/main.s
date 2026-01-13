@@ -14,6 +14,7 @@
         IMPORT  LED_INIT
         IMPORT  LED_CYCLE_SPEED
         IMPORT  LED_SET_MODE
+        IMPORT  LED_SET_PERIOD
         IMPORT  BUMPER_INIT
         IMPORT  BUMPER_LEFT_PRESSED
         IMPORT  BUMPER_RIGHT_PRESSED
@@ -29,6 +30,7 @@
         IMPORT  SD_Init
         IMPORT  SD_ReadSector
         IMPORT  SD_IndexDances
+        IMPORT  SD_WriteEmbeddedDances
 
 ;; LED modes
 MODE_ALTERNATE  EQU     0
@@ -54,16 +56,29 @@ __main
         BL      BUMPER_INIT
         BL      BUTTON_INIT
 
+        ;; Set LEDs to alternate mode at 100ms for SD card loading
+        MOV     R0, #MODE_ALTERNATE
+        BL      LED_SET_MODE
+        MOV     R0, #100
+        BL      LED_SET_PERIOD
+
         ;; Try to initialize SD card (with timeout - won't hang)
         BL      SD_Init
         CMP     R0, #1
         BNE     sd_not_available
 
-        ;; SD card OK - index dances
+        ;; SD card OK - write embedded dances to SD card
+        BL      SD_WriteEmbeddedDances
+
+        ;; Index dances (will find the ones we just wrote)
         BL      SD_IndexDances
         LDR     R0, =SD_AVAILABLE
         MOV     R1, #1
         STR     R1, [R0]
+
+        ;; Restore default LED period after loading
+        LDR     R0, =488
+        BL      LED_SET_PERIOD
 
         ;; Set idle mode: right LED fixed ON, left blinks
         LDR     R0, =IDLE_MODE
@@ -77,6 +92,10 @@ sd_not_available
         LDR     R0, =SD_AVAILABLE
         MOV     R1, #0
         STR     R1, [R0]
+
+        ;; Restore default LED period after loading
+        LDR     R0, =488
+        BL      LED_SET_PERIOD
 
         ;; Set idle mode: right LED blinks 2x faster than left
         LDR     R0, =IDLE_MODE
@@ -132,13 +151,47 @@ wait_bumper_left_release
 
 ;; ============================================
 ;; Bumper right - play SD card dance
+;; Hold bumper right, then press SW1 for dance 0 or SW2 for dance 1
+;; Release bumper right without button → play default (dance 0)
 ;; ============================================
 do_sd_dance
-wait_bumper_right_release
+        MOV     R5, #0              ; Default to dance 0
+
+        ;; Wait loop: check for SW1, SW2, or bumper release
+wait_for_button_or_release
+        ;; Check if SW1 pressed
+        BL      BUTTON1_PRESSED
+        CMP     R0, #1
+        BEQ     got_dance_0
+
+        ;; Check if SW2 pressed
+        BL      BUTTON2_PRESSED
+        CMP     R0, #1
+        BEQ     got_dance_1
+
+        ;; Check if bumper still held
         BL      BUMPER_RIGHT_PRESSED
         CMP     R0, #1
-        BEQ     wait_bumper_right_release
+        BEQ     wait_for_button_or_release  ; Still held, keep waiting
 
+        ;; Bumper released without button → do nothing, go back
+        BL      debounce_long
+        B       wait_input
+
+got_dance_0
+        MOV     R5, #0
+        B       wait_bumper_release_then_play
+
+got_dance_1
+        MOV     R5, #1
+
+wait_bumper_release_then_play
+        ;; Wait for bumper to be released
+        BL      BUMPER_RIGHT_PRESSED
+        CMP     R0, #1
+        BEQ     wait_bumper_release_then_play
+
+play_selected_dance
         BL      debounce_long
 
         ;; Check if SD card is available
@@ -151,8 +204,8 @@ wait_bumper_right_release
         MOV     R0, #MODE_ALTERNATE
         BL      LED_SET_MODE
 
-        ;; Play first dance from SD card (index 0)
-        MOV     R0, #0
+        ;; Play selected dance from SD card
+        MOV     R0, R5              ; Get dance index from R5
         BL      SD_ReadSector
 
         ;; Back to idle mode

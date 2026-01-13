@@ -7,6 +7,8 @@ DANCE_COUNT  DCD 0
         EXPORT SD_ReadSector
         EXPORT SD_IndexDances
 		EXPORT DANCE_COUNT
+        EXPORT sd_spi_send
+        EXPORT sd_spi_read_R1
 
         IMPORT  MOTEUR_SET_VITESSE
         IMPORT  LED_SET_PERIOD
@@ -413,9 +415,9 @@ RSB_L_DONE
 
 RSB_E_OUT
         MOV     R0, #0x08
-        STR     R0, [R4]            
-        MOV     R0, #0              
-        POP     {R4-R7, PC}         
+        STR     R0, [R4]
+        MOV     R0, #0
+        POP     {R4-R7, PC}
 
 ; --- DELAIS ---
 VariableDelay

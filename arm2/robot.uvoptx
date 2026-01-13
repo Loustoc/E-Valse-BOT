@@ -135,7 +135,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>lmidk-agdi</Key>
-          <Name>-U0C11115CA -O4622 -S3 -FO29</Name>
+          <Name>-U0C111653A -O4622 -S3 -FO62</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -364,6 +364,30 @@
       <bDave2>0</bDave2>
       <PathWithFileName>.\bumpers.s</PathWithFileName>
       <FilenameWithoutPath>bumpers.s</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>1</GroupNumber>
+      <FileNumber>10</FileNumber>
+      <FileType>2</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>.\sd_writer.s</PathWithFileName>
+      <FilenameWithoutPath>sd_writer.s</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>1</GroupNumber>
+      <FileNumber>11</FileNumber>
+      <FileType>2</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>.\embedded_dances.s</PathWithFileName>
+      <FilenameWithoutPath>embedded_dances.s</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

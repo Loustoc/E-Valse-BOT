@@ -429,6 +429,16 @@
               <FileType>2</FileType>
               <FilePath>.\bumpers.s</FilePath>
             </File>
+            <File>
+              <FileName>sd_writer.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\sd_writer.s</FilePath>
+            </File>
+            <File>
+              <FileName>embedded_dances.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\embedded_dances.s</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

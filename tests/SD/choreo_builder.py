@@ -229,9 +229,25 @@ if __name__ == "__main__":
     # Select dance from command line or default to VALSE
     dance_name = sys.argv[1] if len(sys.argv) > 1 else "valse"
 
+    # Special case: generate combined binary with all dances
+    if dance_name == "all":
+        output_file = "choreo_all.bin"
+        total_bytes = 0
+        # TEST: Use valse twice to check if issue is with dance position
+        dance_list = ["valse", "valse"]  # Change back to ["valse", "italodisco"] after testing
+        with open(output_file, "wb") as f:
+            for name in dance_list:
+                dance, speed, led = DANCES[name]
+                binary_data = create_dance_blocks(dance, speed, led)
+                f.write(binary_data)
+                total_bytes += len(binary_data)
+        print(f"Created {output_file} ({total_bytes} bytes)")
+        print(f"  Contains: {dance_list[0]} (sectors 0-1), {dance_list[1]} (sectors 2-3)")
+        sys.exit(0)
+
     if dance_name not in DANCES:
         print(f"Unknown dance: {dance_name}")
-        print(f"Available dances: {', '.join(DANCES.keys())}")
+        print(f"Available dances: {', '.join(DANCES.keys())}, all")
         sys.exit(1)
 
     dance, motor_speed, led_period = DANCES[dance_name]

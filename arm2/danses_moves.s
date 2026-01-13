@@ -33,7 +33,7 @@ VALSE
 		
 		LDR     R0, =1000
         BL      LED_SET_PERIOD
-        
+valse_start        
         BL  MOTEUR_GAUCHE_ON
 		BL 	MOTEUR_DROIT_ON
         BL  MOTEUR_GAUCHE_ARRIERE
@@ -62,6 +62,8 @@ valse_w2
 valse_w3
         SUBS R1, #1
         BNE  valse_w3
+		
+		B valse_start
 
 		POP {LR}
         BX  LR
@@ -367,10 +369,68 @@ ITALODISCO
         BL  MOTEUR_GAUCHE_AVANT
         BL  MOTEUR_DROIT_AVANT
 
-        LDR R1, =DUREE*10
+        LDR R1, =DUREE*2
 disco_test_w1
         SUBS R1, #1
         BNE  disco_test_w1
+		
+		
+		BL FRONTBACK
+		BL FRONTBACK
+		BL FRONTBACK
+		BL FRONTBACK
+		
+		BL WALK
+		BL WALK
+		
+		
+		BL STAR
+		BL STAR
+		BL STAR
+		BL STAR
+		BL MOTEUR_DROIT_ON
+		
+	
+		BL  FRONT
+		
+		
+		BL STAR
+		BL STAR
+		BL STAR
+		BL STAR
+		BL FRONTBACK
+		
+		BL WALK_BACK
+		BL WALK 
+		BL FRONTBACK
+		BL FRONTSHORT
+		
+		
+		BL CIRCLE_RIGHT
+		BL CIRCLE_RIGHT
+		BL DEMICIRCLE_RIGHT
+		
+		
+		BL FRONTBACK
+		BL FRONTBACK
+		BL FRONTBACK
+		
+		BL WALK
+		BL WALK 
+		BL WALK	
+		BL WALK_BACK
+		
+		BL DEMICIRCLE_LEFT
+		BL DEMICIRCLE_RIGHT
+		BL FRONTBACK
+		BL DEMICIRCLE_LEFT
+		BL DEMICIRCLE_RIGHT
+		BL FRONTBACK
+		
+		
+		BL MOTEUR_DROIT_OFF
+		BL FRONTBACK
+		BL FRONTBACK
 
 		;; Stop motors
 		BL MOTEUR_GAUCHE_OFF
