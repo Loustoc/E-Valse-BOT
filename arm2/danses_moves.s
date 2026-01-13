@@ -16,57 +16,71 @@
 			
         IMPORT  LED_INIT                ; Initialize LEDs + start SysTick
         IMPORT  LED_SET_PERIOD          ; Change blink speed
+        IMPORT  TICK_MS                 ; Millisecond counter from led.s
 			
 DUREE           EQU 0x001FFFFF
 	
 VITESSE_VALSE   EQU     0x155           ; Slow
 VITESSE_DISCO   EQU     0x005           ; Fast
+DANCE_DURATION  EQU     90000           ; 90 seconds in milliseconds (all dances)
 
 		EXPORT  VALSE
 
 VALSE
-		
-		PUSH {LR}
-		
+		PUSH    {R4-R6, LR}
+
+		;; R4 = duration in milliseconds
+		LDR     R4, =DANCE_DURATION
+
+		;; R6 = pointer to TICK_MS, R5 = start time
+		LDR     R6, =TICK_MS
+		LDR     R5, [R6]            ; R5 = start tick
+
+		;; Set speed and LED
 		LDR     R0, =VITESSE_VALSE
-        BL      MOTEUR_SET_VITESSE
-		
+		BL      MOTEUR_SET_VITESSE
 		LDR     R0, =1000
-        BL      LED_SET_PERIOD
-valse_start        
-        BL  MOTEUR_GAUCHE_ON
-		BL 	MOTEUR_DROIT_ON
-        BL  MOTEUR_GAUCHE_ARRIERE
-        BL  MOTEUR_DROIT_AVANT
+		BL      LED_SET_PERIOD
 
-        LDR R1, =DUREE*21
+valse_start
+		BL      MOTEUR_GAUCHE_ON
+		BL      MOTEUR_DROIT_ON
+		BL      MOTEUR_GAUCHE_ARRIERE
+		BL      MOTEUR_DROIT_AVANT
+
+		LDR     R1, =DUREE*21
 valse_w1
-        SUBS R1, #1
-        BNE  valse_w1
-		
-        
-        BL  MOTEUR_GAUCHE_AVANT
-        BL  MOTEUR_DROIT_AVANT
+		SUBS    R1, #1
+		BNE     valse_w1
 
-        LDR R1, =DUREE*10
+		BL      MOTEUR_GAUCHE_AVANT
+		BL      MOTEUR_DROIT_AVANT
+
+		LDR     R1, =DUREE*10
 valse_w2
-        SUBS R1, #1
-        BNE  valse_w2
+		SUBS    R1, #1
+		BNE     valse_w2
 
+		BL      MOTEUR_DROIT_AVANT
+		BL      MOTEUR_GAUCHE_OFF
 
-
-        BL  MOTEUR_DROIT_AVANT
-        BL  MOTEUR_GAUCHE_OFF
-
-        LDR R1, =DUREE*10
+		LDR     R1, =DUREE*10
 valse_w3
-        SUBS R1, #1
-        BNE  valse_w3
-		
-		B valse_start
+		SUBS    R1, #1
+		BNE     valse_w3
 
-		POP {LR}
-        BX  LR
+		;; Check if duration reached
+		LDR     R0, [R6]            ; Current tick
+		SUB     R0, R0, R5          ; Elapsed = current - start
+		CMP     R0, R4              ; Compare with duration (ms)
+		BLT     valse_start         ; Continue if not reached
+
+		;; Stop motors and return
+		BL      MOTEUR_GAUCHE_OFF
+		BL      MOTEUR_DROIT_OFF
+
+		POP     {R4-R6, LR}
+		BX      LR
 		
 		
 ; STAR		
@@ -354,25 +368,32 @@ fs_wait
 		
 		EXPORT ITALODISCO
 ITALODISCO
-;; MINIMAL TEST VERSION - just do one simple move
-		PUSH {LR}
+		PUSH    {R4-R6, LR}
+
+		;; R4 = duration in milliseconds
+		LDR     R4, =DANCE_DURATION
+
+		;; R6 = pointer to TICK_MS, R5 = start time
+		LDR     R6, =TICK_MS
+		LDR     R5, [R6]            ; R5 = start tick
 
 		LDR     R0, =VITESSE_DISCO
-        BL      MOTEUR_SET_VITESSE
+		BL      MOTEUR_SET_VITESSE
 
 		LDR     R0, =487
-        BL      LED_SET_PERIOD
+		BL      LED_SET_PERIOD
 
-		;; Turn motors on and go forward (same as VALSE start)
-		BL  MOTEUR_GAUCHE_ON
-		BL 	MOTEUR_DROIT_ON
-        BL  MOTEUR_GAUCHE_AVANT
-        BL  MOTEUR_DROIT_AVANT
+disco_start
+		;; Turn motors on and go forward
+		BL      MOTEUR_GAUCHE_ON
+		BL      MOTEUR_DROIT_ON
+		BL      MOTEUR_GAUCHE_AVANT
+		BL      MOTEUR_DROIT_AVANT
 
-        LDR R1, =DUREE*2
+		LDR     R1, =DUREE*2
 disco_test_w1
-        SUBS R1, #1
-        BNE  disco_test_w1
+		SUBS    R1, #1
+		BNE     disco_test_w1
 		
 		
 		BL FRONTBACK
@@ -432,11 +453,17 @@ disco_test_w1
 		BL FRONTBACK
 		BL FRONTBACK
 
-		;; Stop motors
-		BL MOTEUR_GAUCHE_OFF
-		BL MOTEUR_DROIT_OFF
+		;; Check if duration reached
+		LDR     R0, [R6]            ; Current tick
+		SUB     R0, R0, R5          ; Elapsed = current - start
+		CMP     R0, R4              ; Compare with duration (ms)
+		BLT     disco_start         ; Continue if not reached
 
-		POP {LR}
-        BX  LR
+		;; Stop motors and return
+		BL      MOTEUR_GAUCHE_OFF
+		BL      MOTEUR_DROIT_OFF
+
+		POP     {R4-R6, LR}
+		BX      LR
 
 		END

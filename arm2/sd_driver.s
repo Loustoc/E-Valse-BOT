@@ -20,11 +20,13 @@ DANCE_COUNT  DCD 0
         IMPORT  MOTEUR_DROIT_OFF
         IMPORT  MOTEUR_DROIT_AVANT
         IMPORT  MOTEUR_DROIT_ARRIERE
+        IMPORT  TICK_MS                 ; Millisecond counter from led.s
 
 SSI0_BASE         EQU 0x40008000
 GPIO_PORTA_BASE   EQU 0x40004000
 PA3_CS_ADDR       EQU 0x40004020
 RAM_BUF           EQU 0x20002000
+DANCE_DURATION    EQU 90000             ; 90 seconds in milliseconds
 	
 SD_IndexDances
         PUSH    {R4-R8, LR}
@@ -200,7 +202,7 @@ SD_INIT_FAIL
         MOV     R0, #0              ; return 0 = failure
         POP     {R4-R6, PC}
 SD_ReadSector
-        PUSH    {R4-R8, LR}
+        PUSH    {R4-R11, LR}
         MOV     R8, R0
 
         LDR     R1, =DANCE_COUNT
@@ -242,6 +244,12 @@ SD_ReadSector
         BNE     READ_FAIL
 
         LDR     R4, =RAM_BUF
+
+        ;; Setup duration tracking
+        ;; R9 = pointer to TICK_MS, R10 = start time, R11 = duration
+        LDR     R9, =TICK_MS
+        LDR     R10, [R9]               ; R10 = start tick
+        LDR     R11, =DANCE_DURATION    ; R11 = 90000 ms
 
 ;; ============================================
 ;; CHOREO_EXEC - Execute choreography v3 format
@@ -329,18 +337,24 @@ DANCE_DELAY
         SUBS    R6, R6, #1
         BNE     DANCE_DELAY
 
+        ;; Check if duration reached
+        LDR     R0, [R9]                ; Current tick
+        SUB     R0, R0, R10             ; Elapsed = current - start
+        CMP     R0, R11                 ; Compare with duration (ms)
+        BGE     CHOREO_END              ; Stop if duration reached
+
         B       CHOREO_EXEC
 
 CHOREO_END
 		BL 		MOTEUR_DROIT_OFF
 		BL 		MOTEUR_GAUCHE_OFF
-		
+
         MOV     R0, #1                   ; success
-        POP     {R4-R8, PC}
+        POP     {R4-R11, PC}
 
 READ_FAIL
         MOV     R0, #0
-        POP     {R4-R8, PC}
+        POP     {R4-R11, PC}
 
 Read_Single_Block
         PUSH    {R4-R7, LR}        
