@@ -99,6 +99,23 @@ def stop(duration):
     """Both motors off (pause)"""
     return move(OFF, OFF, duration)
 
+# ============================================
+# VALSE dance (converted from danses_moves.s)
+# ============================================
+# Original VALSE (slow waltz):
+#   1. Left motor backward + Right motor forward (rotate left) - 21 units
+#   2. Both motors forward - 10 units
+#   3. Left motor off + Right motor forward (turn left) - 10 units
+
+DANCEUNKNOWN = [
+    rotate_right(14),      # Rotate left for 21 units
+    forward(20),          # Go forward for 10 units
+    turn_left(14),        # Turn left (left off, right fwd) for 10 units
+]
+
+VALSE_SPEED = 0x075      # Slow speed for waltz (higher = slower)
+VALSE_LED = 678         # 1 second LED period
+
 
 # ============================================
 # VALSE dance (converted from danses_moves.s)
