@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\robot.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\robot.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6240002: Last Updated: Sun Jan 11 23:33:31 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6240002: Last Updated: Tue Jan 13 04:02:47 2026
 <BR><P>
 <H3>Maximum Stack Usage =          0 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -24,14 +24,40 @@ Functions with no stack information
  <LI><a href="#[d]">MOTEUR_GAUCHE_AVANT</a>
  <LI><a href="#[e]">MOTEUR_DROIT_INVERSE</a>
  <LI><a href="#[f]">MOTEUR_GAUCHE_INVERSE</a>
- <LI><a href="#[10]">SWITCH_INIT</a>
- <LI><a href="#[14]">READ_SWITCH</a>
- <LI><a href="#[4]">__main</a>
- <LI><a href="#[15]">L_LED_ON</a>
- <LI><a href="#[13]">R_LED_ON</a>
- <LI><a href="#[12]">SD_IndexDances</a>
- <LI><a href="#[11]">SD_Init</a>
- <LI><a href="#[16]">SD_ReadSector</a>
+ <LI><a href="#[10]">MOTEUR_SET_VITESSE</a>
+ <LI><a href="#[11]">__main</a>
+ <LI><a href="#[13]">LED_INIT</a>
+ <LI><a href="#[4]">SysTick_Handler</a>
+ <LI><a href="#[21]">LED_SET_PERIOD</a>
+ <LI><a href="#[18]">LED_CYCLE_SPEED</a>
+ <LI><a href="#[2d]">LED_GET_MULTIPLIER</a>
+ <LI><a href="#[15]">LED_SET_MODE</a>
+ <LI><a href="#[19]">STOP_BLINKING</a>
+ <LI><a href="#[1d]">START_BLINKING</a>
+ <LI><a href="#[2e]">L_LED_ON</a>
+ <LI><a href="#[1c]">R_LED_ON</a>
+ <LI><a href="#[1f]">LEDS_OFF</a>
+ <LI><a href="#[20]">VALSE</a>
+ <LI><a href="#[22]">STAR</a>
+ <LI><a href="#[23]">CIRCLE_RIGHT</a>
+ <LI><a href="#[24]">CIRCLE_LEFT</a>
+ <LI><a href="#[25]">DEMICIRCLE_RIGHT</a>
+ <LI><a href="#[26]">DEMICIRCLE_LEFT</a>
+ <LI><a href="#[27]">WALK</a>
+ <LI><a href="#[28]">WALK_BACK</a>
+ <LI><a href="#[29]">FRONTBACK</a>
+ <LI><a href="#[2a]">FRONT</a>
+ <LI><a href="#[2b]">FRONTSHORT</a>
+ <LI><a href="#[2c]">ITALODISCO</a>
+ <LI><a href="#[12]">BUTTON_INIT</a>
+ <LI><a href="#[17]">BUTTON1_PRESSED</a>
+ <LI><a href="#[2f]">BUTTON2_PRESSED</a>
+ <LI><a href="#[14]">BUMPER_INIT</a>
+ <LI><a href="#[16]">BUMPER_LEFT_PRESSED</a>
+ <LI><a href="#[30]">BUMPER_RIGHT_PRESSED</a>
+ <LI><a href="#[1b]">SD_IndexDances</a>
+ <LI><a href="#[1a]">SD_Init</a>
+ <LI><a href="#[1e]">SD_ReadSector</a>
  <LI><a href="#[1]">NmiSR</a>
  <LI><a href="#[2]">FaultISR</a>
  <LI><a href="#[3]">IntDefaultHandler</a>
@@ -49,79 +75,331 @@ Mutually Recursive functions
 Function Pointers
 </H3><UL>
  <LI><a href="#[2]">FaultISR</a> from startup.o(RESET) referenced from startup.o(RESET)
- <LI><a href="#[3]">IntDefaultHandler</a> from startup.o(RESET) referenced 121 times from startup.o(RESET)
+ <LI><a href="#[3]">IntDefaultHandler</a> from startup.o(RESET) referenced 120 times from startup.o(RESET)
  <LI><a href="#[1]">NmiSR</a> from startup.o(RESET) referenced from startup.o(RESET)
  <LI><a href="#[0]">Reset_Handler</a> from startup.o(RESET) referenced from startup.o(RESET)
+ <LI><a href="#[4]">SysTick_Handler</a> from led.o(.text) referenced from startup.o(RESET)
 </UL>
 <P>
 <H3>
 Global Symbols
 </H3>
 <P><STRONG><a name="[0]"></a>Reset_Handler</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, startup.o(RESET))
-<BR><BR>[Calls]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+<BR><BR>[Calls]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup.o(RESET)
 </UL>
 <P><STRONG><a name="[5]"></a>MOTEUR_INIT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
 
-<P><STRONG><a name="[6]"></a>MOTEUR_DROIT_ON</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
+<P><STRONG><a name="[6]"></a>MOTEUR_DROIT_ON</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[2c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ITALODISCO
+<LI><a href="#[20]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;VALSE
+<LI><a href="#[22]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;STAR
+<LI><a href="#[1e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_ReadSector
+</UL>
 
-<P><STRONG><a name="[7]"></a>MOTEUR_DROIT_OFF</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
+<P><STRONG><a name="[7]"></a>MOTEUR_DROIT_OFF</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[2c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ITALODISCO
+<LI><a href="#[22]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;STAR
+<LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
 
-<P><STRONG><a name="[8]"></a>MOTEUR_GAUCHE_ON</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
+<P><STRONG><a name="[8]"></a>MOTEUR_GAUCHE_ON</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[2c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ITALODISCO
+<LI><a href="#[20]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;VALSE
+<LI><a href="#[1e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_ReadSector
+</UL>
 
-<P><STRONG><a name="[9]"></a>MOTEUR_GAUCHE_OFF</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
+<P><STRONG><a name="[9]"></a>MOTEUR_GAUCHE_OFF</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[2c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ITALODISCO
+<LI><a href="#[20]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;VALSE
+<LI><a href="#[22]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;STAR
+<LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
 
-<P><STRONG><a name="[a]"></a>MOTEUR_DROIT_ARRIERE</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
+<P><STRONG><a name="[a]"></a>MOTEUR_DROIT_ARRIERE</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[2b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FRONTSHORT
+<LI><a href="#[2a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FRONT
+<LI><a href="#[28]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WALK_BACK
+<LI><a href="#[27]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WALK
+<LI><a href="#[22]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;STAR
+<LI><a href="#[29]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FRONTBACK
+<LI><a href="#[26]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DEMICIRCLE_LEFT
+<LI><a href="#[24]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CIRCLE_LEFT
+<LI><a href="#[1e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_ReadSector
+</UL>
 
-<P><STRONG><a name="[b]"></a>MOTEUR_DROIT_AVANT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
+<P><STRONG><a name="[b]"></a>MOTEUR_DROIT_AVANT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[20]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;VALSE
+<LI><a href="#[28]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WALK_BACK
+<LI><a href="#[27]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WALK
+<LI><a href="#[22]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;STAR
+<LI><a href="#[29]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FRONTBACK
+<LI><a href="#[25]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DEMICIRCLE_RIGHT
+<LI><a href="#[23]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CIRCLE_RIGHT
+<LI><a href="#[1e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_ReadSector
+</UL>
 
-<P><STRONG><a name="[c]"></a>MOTEUR_GAUCHE_ARRIERE</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
+<P><STRONG><a name="[c]"></a>MOTEUR_GAUCHE_ARRIERE</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[2b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FRONTSHORT
+<LI><a href="#[2a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FRONT
+<LI><a href="#[20]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;VALSE
+<LI><a href="#[28]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WALK_BACK
+<LI><a href="#[27]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WALK
+<LI><a href="#[22]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;STAR
+<LI><a href="#[29]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FRONTBACK
+<LI><a href="#[25]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DEMICIRCLE_RIGHT
+<LI><a href="#[23]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CIRCLE_RIGHT
+<LI><a href="#[1e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_ReadSector
+</UL>
 
-<P><STRONG><a name="[d]"></a>MOTEUR_GAUCHE_AVANT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
+<P><STRONG><a name="[d]"></a>MOTEUR_GAUCHE_AVANT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[20]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;VALSE
+<LI><a href="#[28]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WALK_BACK
+<LI><a href="#[27]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WALK
+<LI><a href="#[22]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;STAR
+<LI><a href="#[29]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FRONTBACK
+<LI><a href="#[26]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DEMICIRCLE_LEFT
+<LI><a href="#[24]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CIRCLE_LEFT
+<LI><a href="#[1e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_ReadSector
+</UL>
 
 <P><STRONG><a name="[e]"></a>MOTEUR_DROIT_INVERSE</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
 
 <P><STRONG><a name="[f]"></a>MOTEUR_GAUCHE_INVERSE</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
 
-<P><STRONG><a name="[10]"></a>SWITCH_INIT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, switch.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+<P><STRONG><a name="[10]"></a>MOTEUR_SET_VITESSE</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, motor.o(.text), UNUSED, KEPT)
+<BR><BR>[Called By]<UL><LI><a href="#[2c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ITALODISCO
+<LI><a href="#[20]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;VALSE
 </UL>
 
-<P><STRONG><a name="[14]"></a>READ_SWITCH</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, switch.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
-</UL>
-
-<P><STRONG><a name="[4]"></a>__main</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, main.o(.text))
-<BR><BR>[Calls]<UL><LI><a href="#[16]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_ReadSector
-<LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init
-<LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_IndexDances
-<LI><a href="#[13]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;R_LED_ON
-<LI><a href="#[15]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;L_LED_ON
-<LI><a href="#[14]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;READ_SWITCH
-<LI><a href="#[10]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SWITCH_INIT
+<P><STRONG><a name="[11]"></a>__main</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, main.o(.text))
+<BR><BR>[Calls]<UL><LI><a href="#[19]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;STOP_BLINKING
+<LI><a href="#[1d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;START_BLINKING
+<LI><a href="#[1e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_ReadSector
+<LI><a href="#[1a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_Init
+<LI><a href="#[1b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_IndexDances
+<LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;R_LED_ON
+<LI><a href="#[15]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LED_SET_MODE
+<LI><a href="#[13]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LED_INIT
+<LI><a href="#[18]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LED_CYCLE_SPEED
+<LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BUTTON_INIT
+<LI><a href="#[17]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BUTTON1_PRESSED
+<LI><a href="#[16]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BUMPER_LEFT_PRESSED
+<LI><a href="#[14]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BUMPER_INIT
+<LI><a href="#[9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_OFF
+<LI><a href="#[7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_OFF
+<LI><a href="#[5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_INIT
 </UL>
 <BR>[Called By]<UL><LI><a href="#[0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Handler
 </UL>
 
-<P><STRONG><a name="[15]"></a>L_LED_ON</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, led.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+<P><STRONG><a name="[13]"></a>LED_INIT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, led.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
 </UL>
 
-<P><STRONG><a name="[13]"></a>R_LED_ON</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, led.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+<P><STRONG><a name="[4]"></a>SysTick_Handler</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, led.o(.text))
+<BR>[Address Reference Count : 1]<UL><LI> startup.o(RESET)
+</UL>
+<P><STRONG><a name="[21]"></a>LED_SET_PERIOD</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, led.o(.text), UNUSED)
+<BR><BR>[Called By]<UL><LI><a href="#[2c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ITALODISCO
+<LI><a href="#[20]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;VALSE
 </UL>
 
-<P><STRONG><a name="[12]"></a>SD_IndexDances</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, sd_driver.o(SD_DRIVER))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+<P><STRONG><a name="[18]"></a>LED_CYCLE_SPEED</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, led.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
 </UL>
 
-<P><STRONG><a name="[11]"></a>SD_Init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, sd_driver.o(SD_DRIVER))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+<P><STRONG><a name="[2d]"></a>LED_GET_MULTIPLIER</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, led.o(.text), UNUSED)
+
+<P><STRONG><a name="[15]"></a>LED_SET_MODE</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, led.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
 </UL>
 
-<P><STRONG><a name="[16]"></a>SD_ReadSector</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, sd_driver.o(SD_DRIVER))
-<BR><BR>[Called By]<UL><LI><a href="#[4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+<P><STRONG><a name="[19]"></a>STOP_BLINKING</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, led.o(.text))
+<BR><BR>[Calls]<UL><LI><a href="#[1f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LEDS_OFF
+</UL>
+<BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
+
+<P><STRONG><a name="[1d]"></a>START_BLINKING</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, led.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
+
+<P><STRONG><a name="[2e]"></a>L_LED_ON</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, led.o(.text), UNUSED)
+
+<P><STRONG><a name="[1c]"></a>R_LED_ON</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, led.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
+
+<P><STRONG><a name="[1f]"></a>LEDS_OFF</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, led.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[19]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;STOP_BLINKING
+</UL>
+
+<P><STRONG><a name="[20]"></a>VALSE</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, danses_moves.o(.text), UNUSED)
+<BR><BR>[Calls]<UL><LI><a href="#[21]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LED_SET_PERIOD
+<LI><a href="#[10]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_SET_VITESSE
+<LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_AVANT
+<LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_ARRIERE
+<LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_AVANT
+<LI><a href="#[9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_OFF
+<LI><a href="#[8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_ON
+<LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_ON
+</UL>
+
+<P><STRONG><a name="[22]"></a>STAR</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, danses_moves.o(.text))
+<BR><BR>[Calls]<UL><LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_AVANT
+<LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_ARRIERE
+<LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_AVANT
+<LI><a href="#[a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_ARRIERE
+<LI><a href="#[9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_OFF
+<LI><a href="#[7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_OFF
+<LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_ON
+</UL>
+<BR>[Called By]<UL><LI><a href="#[2c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ITALODISCO
+<LI><a href="#[1e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_ReadSector
+</UL>
+
+<P><STRONG><a name="[23]"></a>CIRCLE_RIGHT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, danses_moves.o(.text))
+<BR><BR>[Calls]<UL><LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_ARRIERE
+<LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_AVANT
+</UL>
+<BR>[Called By]<UL><LI><a href="#[2c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ITALODISCO
+<LI><a href="#[1e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_ReadSector
+</UL>
+
+<P><STRONG><a name="[24]"></a>CIRCLE_LEFT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, danses_moves.o(.text))
+<BR><BR>[Calls]<UL><LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_AVANT
+<LI><a href="#[a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_ARRIERE
+</UL>
+<BR>[Called By]<UL><LI><a href="#[1e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_ReadSector
+</UL>
+
+<P><STRONG><a name="[25]"></a>DEMICIRCLE_RIGHT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, danses_moves.o(.text))
+<BR><BR>[Calls]<UL><LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_ARRIERE
+<LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_AVANT
+</UL>
+<BR>[Called By]<UL><LI><a href="#[2c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ITALODISCO
+<LI><a href="#[1e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_ReadSector
+</UL>
+
+<P><STRONG><a name="[26]"></a>DEMICIRCLE_LEFT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, danses_moves.o(.text))
+<BR><BR>[Calls]<UL><LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_AVANT
+<LI><a href="#[a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_ARRIERE
+</UL>
+<BR>[Called By]<UL><LI><a href="#[2c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ITALODISCO
+<LI><a href="#[1e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_ReadSector
+</UL>
+
+<P><STRONG><a name="[27]"></a>WALK</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, danses_moves.o(.text))
+<BR><BR>[Calls]<UL><LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_AVANT
+<LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_ARRIERE
+<LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_AVANT
+<LI><a href="#[a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_ARRIERE
+</UL>
+<BR>[Called By]<UL><LI><a href="#[2c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ITALODISCO
+<LI><a href="#[1e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_ReadSector
+</UL>
+
+<P><STRONG><a name="[28]"></a>WALK_BACK</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, danses_moves.o(.text))
+<BR><BR>[Calls]<UL><LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_AVANT
+<LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_ARRIERE
+<LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_AVANT
+<LI><a href="#[a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_ARRIERE
+</UL>
+<BR>[Called By]<UL><LI><a href="#[2c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ITALODISCO
+<LI><a href="#[1e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_ReadSector
+</UL>
+
+<P><STRONG><a name="[29]"></a>FRONTBACK</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, danses_moves.o(.text))
+<BR><BR>[Calls]<UL><LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_AVANT
+<LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_ARRIERE
+<LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_AVANT
+<LI><a href="#[a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_ARRIERE
+</UL>
+<BR>[Called By]<UL><LI><a href="#[2c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ITALODISCO
+<LI><a href="#[1e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SD_ReadSector
+</UL>
+
+<P><STRONG><a name="[2a]"></a>FRONT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, danses_moves.o(.text), UNUSED)
+<BR><BR>[Calls]<UL><LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_ARRIERE
+<LI><a href="#[a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_ARRIERE
+</UL>
+<BR>[Called By]<UL><LI><a href="#[2c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ITALODISCO
+</UL>
+
+<P><STRONG><a name="[2b]"></a>FRONTSHORT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, danses_moves.o(.text), UNUSED)
+<BR><BR>[Calls]<UL><LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_ARRIERE
+<LI><a href="#[a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_ARRIERE
+</UL>
+<BR>[Called By]<UL><LI><a href="#[2c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ITALODISCO
+</UL>
+
+<P><STRONG><a name="[2c]"></a>ITALODISCO</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, danses_moves.o(.text), UNUSED)
+<BR><BR>[Calls]<UL><LI><a href="#[2b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FRONTSHORT
+<LI><a href="#[2a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FRONT
+<LI><a href="#[21]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LED_SET_PERIOD
+<LI><a href="#[28]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WALK_BACK
+<LI><a href="#[27]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WALK
+<LI><a href="#[22]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;STAR
+<LI><a href="#[29]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FRONTBACK
+<LI><a href="#[25]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DEMICIRCLE_RIGHT
+<LI><a href="#[26]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DEMICIRCLE_LEFT
+<LI><a href="#[23]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CIRCLE_RIGHT
+<LI><a href="#[10]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_SET_VITESSE
+<LI><a href="#[9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_OFF
+<LI><a href="#[8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_ON
+<LI><a href="#[7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_OFF
+<LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_ON
+</UL>
+
+<P><STRONG><a name="[12]"></a>BUTTON_INIT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, button.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
+
+<P><STRONG><a name="[17]"></a>BUTTON1_PRESSED</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, button.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
+
+<P><STRONG><a name="[2f]"></a>BUTTON2_PRESSED</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, button.o(.text), UNUSED)
+
+<P><STRONG><a name="[14]"></a>BUMPER_INIT</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, bumpers.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
+
+<P><STRONG><a name="[16]"></a>BUMPER_LEFT_PRESSED</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, bumpers.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
+
+<P><STRONG><a name="[30]"></a>BUMPER_RIGHT_PRESSED</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, bumpers.o(.text), UNUSED)
+
+<P><STRONG><a name="[1b]"></a>SD_IndexDances</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, sd_driver.o(SD_DRIVER))
+<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
+
+<P><STRONG><a name="[1a]"></a>SD_Init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, sd_driver.o(SD_DRIVER))
+<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
+
+<P><STRONG><a name="[1e]"></a>SD_ReadSector</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, sd_driver.o(SD_DRIVER))
+<BR><BR>[Calls]<UL><LI><a href="#[28]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WALK_BACK
+<LI><a href="#[27]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WALK
+<LI><a href="#[22]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;STAR
+<LI><a href="#[29]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FRONTBACK
+<LI><a href="#[25]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DEMICIRCLE_RIGHT
+<LI><a href="#[26]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DEMICIRCLE_LEFT
+<LI><a href="#[23]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CIRCLE_RIGHT
+<LI><a href="#[24]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CIRCLE_LEFT
+<LI><a href="#[d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_AVANT
+<LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_ARRIERE
+<LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_AVANT
+<LI><a href="#[a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_ARRIERE
+<LI><a href="#[8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_GAUCHE_ON
+<LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MOTEUR_DROIT_ON
+</UL>
+<BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
 </UL>
 <P>
 <H3>

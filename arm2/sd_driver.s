@@ -7,6 +7,30 @@ DANCE_COUNT  DCD 0
         EXPORT SD_ReadSector
         EXPORT SD_IndexDances
 		EXPORT DANCE_COUNT
+			
+		IMPORT R_LED_ON
+		IMPORT L_LED_ON
+		
+        IMPORT STAR
+        IMPORT CIRCLE_RIGHT
+        IMPORT CIRCLE_LEFT
+        IMPORT DEMICIRCLE_RIGHT
+        IMPORT DEMICIRCLE_LEFT
+        IMPORT WALK
+        IMPORT WALK_BACK
+        IMPORT FRONTBACK
+		IMPORT MOTEUR_INIT
+		IMPORT MOTEUR_DROIT_ON
+		IMPORT MOTEUR_DROIT_OFF
+		IMPORT MOTEUR_DROIT_AVANT
+		IMPORT MOTEUR_DROIT_ARRIERE
+		IMPORT MOTEUR_GAUCHE_ON
+		IMPORT MOTEUR_GAUCHE_OFF
+		IMPORT MOTEUR_GAUCHE_AVANT
+		IMPORT MOTEUR_GAUCHE_ARRIERE
+			
+		IMPORT L_LED_ON
+
 
 SSI0_BASE         EQU 0x40008000
 GPIO_PORTA_BASE   EQU 0x40004000
@@ -17,27 +41,25 @@ RAM_BUF           EQU 0x20002000
 	
 SD_IndexDances
         PUSH    {R4-R8, LR}
-        MOV     R6, #0             
-        MOV     R8, #0              
+        MOV     R6, #0              ; Secteur de départ (LBA)
+        MOV     R8, #0              ; Compteur de danses trouvées
         LDR     R7, =DANCE_TABLE
 
-SCAN_LOOP_INIT
+SCAN_LOOP
         MOV     R0, R6
         LSL     R0, R0, #9          
-        BL      Read_Single_Block
+        BL      Read_Single_Block   
+        
         CMP     R0, #0
-        BEQ     SCAN_NEXT           
+        BEQ     SCAN_NEXT         
 
         LDR     R4, =RAM_BUF
-        LDRB    R0, [R4]
-        CMP     R0, #0x53           ; 'S'
-        BNE     SCAN_NEXT
-        LDRB    R0, [R4, #1]
-        CMP     R0, #0x54           ; 'T'
-        BNE     SCAN_NEXT
+        LDRH    R0, [R4]            
+        LDR     R1, =0x5453        
+        CMP     R0, R1
+        BNE     SCAN_NEXT           
         
-        ADD     R1, R6, #1
-        STR     R1, [R7, R8, LSL #2] ; DANCE_TABLE[R8] = R6 + 1
+        STR     R6, [R7, R8, LSL #2] 
         ADD     R8, R8, #1
         
         CMP     R8, #20             
@@ -45,13 +67,13 @@ SCAN_LOOP_INIT
 
 SCAN_NEXT
         ADD     R6, R6, #1
-        LDR     R1, =5000           
+        LDR     R1, =4000          
         CMP     R6, R1
-        BNE     SCAN_LOOP_INIT
+        BNE     SCAN_LOOP
 
 SCAN_FINISHED
         LDR     R0, =DANCE_COUNT
-        STR     R8, [R0]           
+        STR     R8, [R0]            
         POP     {R4-R8, PC}
 
 sd_spi_send
@@ -175,100 +197,99 @@ ACMD41_LOOP
         POP     {R4-R6, PC}
 SD_ReadSector
         PUSH    {R4-R8, LR}
-        MOV     R8, R0            
+        MOV     R8, R0              
         
         LDR     R1, =DANCE_COUNT
         LDR     R1, [R1]
         CMP     R8, R1
-        BGE     READ_FAIL         
-
+        BGE     READ_FAIL           
+        
         LDR     R1, =DANCE_TABLE
         LDR     R6, [R1, R8, LSL #2] 
-
-        MOV     R0, R6
-        LSL     R0, R0, #9
+        
+        ADD     R0, R6, #1         
+        LSL     R0, R0, #9          
         BL      Read_Single_Block
         CMP     R0, #1
         BNE     READ_FAIL
 
         LDR     R4, =RAM_BUF
-        LDR     R5, =GPIO_PORTF_DATA
+        MOV     R5, #0              
 
-FIND_START
-        LDRB    R0, [R4]
-        CMP     R0, #0x00           
-        BEQ     SKIP_EMPTY
-        CMP     R0, #0x20          
-        BNE     CHOREO_EXEC         
-SKIP_EMPTY
-        ADD     R4, R4, #1
-        B       FIND_START
+FIND_DATA_START
+        CMP     R5, #510           
+        BGE     CHOREO_END
+        LDRB    R0, [R4], #1
+        ADD     R5, R5, #1
+        CMP     R0, #0x53           ; 'S'
+        BNE     FIND_DATA_START
+        LDRB    R0, [R4], #1        ; 'T'
+        ADD     R5, R5, #1
+        CMP     R0, #0x54
+        BNE     FIND_DATA_START
 
-CHOREO_EXEC
-		; LECTURE DE LA CHOREGRAPHIE
+        ; --- Table de saut ---
+CHOREO_EXEC 
         LDRB    R0, [R4], #1        
-        CMP     R0, #0xFF          
+        ADD     R5, R5, #1          
+        CMP     R5, #512            
+        BGE     CHOREO_END
+        CMP     R0, #0xFF           
         BEQ     CHOREO_END
         CMP     R0, #0x00           
         BEQ     CHOREO_EXEC
+	
+        ; --- TABLE DE SAUT ---
+        CMP     R0, #0x01
+        BLEQ    MOTEUR_AVANT
+        CMP     R0, #0x02
+        BLEQ    MOTEUR_ARRIERE
+        CMP     R0, #0x03
+        BLEQ    PIVOT_DROITE
+        CMP     R0, #0x04
+        BLEQ    PIVOT_GAUCHE
+        CMP     R0, #0x05
+        BLEQ    MOTEURS_OFF
+        CMP     R0, #0x06
+        BLEQ    WALK
+        CMP     R0, #0x07
+        BLEQ    WALK_BACK
+        CMP     R0, #0x08
+        BLEQ    STAR
+        CMP     R0, #0x09
+        BLEQ    CIRCLE_LEFT
+        CMP     R0, #0x0A
+        BLEQ    CIRCLE_RIGHT
+        CMP     R0, #0x0B
+        BLEQ    DEMICIRCLE_LEFT
+        CMP     R0, #0x0C
+        BLEQ    DEMICIRCLE_RIGHT
+        CMP     R0, #0x0D
+        BLEQ    FRONTBACK
 
-        MOV     R1, R0
-        LSR     R1, R1, #6          
-        AND     R2, R0, #0x3F       
+        CMP     R0, #0xFE
+        BNE     CHOREO_EXEC         
 
-        CMP     R1, #0              
-        MOVEQ   R3, #0x10           
-        CMP     R1, #1              
-        MOVEQ   R3, #0x20           
-        CMP     R1, #2              
-        MOVEQ   R3, #0x30           
-        CMP     R1, #3              
-        MOVEQ   R3, #0x02           
-
-        STR     R3, [R5]           
-        ADD     R2, R2, #1          
-        LDR     R7, =2000000        
-        MUL     R2, R2, R7
-        
-DANCE_DELAY
-        SUBS    R2, R2, #1
-        BNE     DANCE_DELAY
-        
-        MOV     R3, #0
-        STR     R3, [R5]            
-        LDR     R2, =500000         
-PAUSE_BETWEEN
-        SUBS    R2, R2, #1
-        BNE     PAUSE_BETWEEN
-        
-        B       CHOREO_EXEC
-TRY_L   CMP     R1, #1              
-        BNE     TRY_F
-        MOV     R3, #0x20           
-        B       APPLY
-TRY_F   CMP     R1, #2              
-        BNE     TRY_B
-        MOV     R3, #0x30           
-        B       APPLY
-TRY_B   MOV     R3, #0x02           
-
-APPLY   STR     R3, [R5]
-        LSL     R2, R2, #10         
+        LDRB    R2, [R4], #1       
+        ADD     R5, R5, #1
         BL      VariableDelay
-        
-        MOV     R3, #0
-        STR     R3, [R5]            
-        BL      ShortPause          
-        
+        B       CHOREO_EXEC         
+
+EXEC_WAIT_PARAM
+        LDRB    R2, [R4], #1        
+        ADD     R5, R5, #1
+        BL      VariableDelay
         B       CHOREO_EXEC
 
 CHOREO_END
+        BL      MOTEURS_OFF        
         MOV     R0, #1              
         POP     {R4-R8, PC}
 
 READ_FAIL
+        BL      MOTEURS_OFF
         MOV     R0, #0
-        POP     {R4-R7, PC}
+        POP     {R4-R8, PC}
 
 Read_Single_Block
         PUSH    {R4-R7, LR}        
@@ -349,18 +370,57 @@ RSB_E_OUT
 
 ; --- DELAIS ---
 VariableDelay
-        PUSH    {R7}               
-        LDR     R7, =100000
+        PUSH    {R7}
+        CMP     R2, #0              
+		BEQ     VD_END             
+        LDR     R7, =10000000        
         MUL     R7, R7, R2
 VD_LP   SUBS    R7, R7, #1
         BNE     VD_LP
-        POP     {R7}              
+VD_END  POP     {R7}
         BX      LR
 
-ShortPause
-        PUSH    {R7}               
-        LDR     R7, =400000
-SP_LP   SUBS    R7, R7, #1
-        BNE     SP_LP
-        POP     {R7}               
-        BX      LR
+MOTEUR_AVANT
+        PUSH    {LR}
+        BL      MOTEURS_OFF         
+        BL      MOTEUR_DROIT_AVANT
+        BL      MOTEUR_GAUCHE_AVANT
+        BL      MOTEUR_DROIT_ON
+        BL      MOTEUR_GAUCHE_ON
+        POP     {PC}
+
+MOTEUR_ARRIERE
+        PUSH    {LR}
+        BL      MOTEURS_OFF
+        BL      MOTEUR_DROIT_ARRIERE
+        BL      MOTEUR_GAUCHE_ARRIERE
+        BL      MOTEUR_DROIT_ON
+        BL      MOTEUR_GAUCHE_ON
+        POP     {PC}
+
+PIVOT_DROITE
+        PUSH    {LR}
+        BL      MOTEURS_OFF
+        BL      MOTEUR_GAUCHE_AVANT
+        BL      MOTEUR_DROIT_ARRIERE
+        BL      MOTEUR_DROIT_ON
+        BL      MOTEUR_GAUCHE_ON
+        POP     {PC}
+
+PIVOT_GAUCHE
+        PUSH    {LR}
+        BL      MOTEURS_OFF
+        BL      MOTEUR_DROIT_AVANT
+        BL      MOTEUR_GAUCHE_ARRIERE
+        BL      MOTEUR_DROIT_ON
+        BL      MOTEUR_GAUCHE_ON
+        POP     {PC}
+
+MOTEURS_OFF
+        PUSH    {R0, R1, LR}
+        MOV     R0, #0
+        LDR     R1, =GPIO_PORTF_DATA
+        STR     R0, [R1]            
+        POP     {R0, R1, PC}
+
+        END

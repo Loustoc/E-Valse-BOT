@@ -63,7 +63,13 @@ LED_MODE        DCD     1               ; 0=alternate, 1=together (default: toge
         EXPORT  LED_GET_MULTIPLIER
         EXPORT  LED_SET_MODE
         EXPORT  TICK_MS
+					
+		EXPORT L_LED_ON
+		EXPORT R_LED_ON
+		EXPORT LEDS_OFF
 
+		EXPORT START_BLINKING
+		EXPORT STOP_BLINKING
 ;; ============================================
 ;; LED_INIT
 ;; ============================================
@@ -267,5 +273,64 @@ LED_SET_MODE
         LDR     R1, =LED_MODE
         STR     R0, [R1]
         BX      LR
+		
+STOP_BLINKING
+        PUSH    {R0, R1, LR}
+        
+        LDR     R1, =NVIC_ST_CTRL
+        MOV     R0, #0
+        STR     R0, [R1]       
+        
+        BL      LEDS_OFF
+        
+        POP     {R0, R1, PC}
 
-        END
+START_BLINKING
+        PUSH    {R0, R1, LR}
+        
+        LDR     R1, =NVIC_ST_CURRENT
+        MOV     R0, #0
+        STR     R0, [R1]
+        
+        LDR     R1, =NVIC_ST_CTRL
+        MOV     R0, #0x07
+        STR     R0, [R1]
+        
+        POP     {R0, R1, PC}
+;; ============================================
+;; MEANT FOR DEBUGGING
+;; ============================================
+L_LED_ON
+		LDR     R0, =GPIO_PORTF_BASE
+		MOV     R1, #LED2      
+		STR     R1, [R0, #0x3FC]
+		NOP
+		NOP
+		NOP
+		BX      LR
+R_LED_ON
+		LDR     R0, =GPIO_PORTF_BASE
+		MOV     R1, #LED1       
+		STR     R1, [R0, #0x3FC]
+		NOP
+		NOP
+		NOP
+		BX      LR
+LEDS_ON
+		LDR     R0, =GPIO_PORTF_BASE
+		MOV     R1, #LED_BOTH
+		STR     R1, [R0, #0x3FC]
+		NOP
+		NOP
+		NOP
+		BX      LR
+LEDS_OFF
+		LDR     R0, =GPIO_PORTF_BASE
+		MOV     R1, #0
+		STR     R1, [R0, #0x3FC]
+		NOP
+		NOP
+		NOP
+		BX      LR
+		
+		END
