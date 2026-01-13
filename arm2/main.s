@@ -215,7 +215,7 @@ play_selected_dance
         B       wait_input
 
 ;; ============================================
-;; Button 1 - SD Dance 0 (VALSE)
+;; Button 1 - VALSE (hardcoded)
 ;; ============================================
 do_valse
 wait_btn1_release
@@ -225,19 +225,12 @@ wait_btn1_release
 
         BL      debounce
 
-        ;; Check if SD card is available
-        LDR     R0, =SD_AVAILABLE
-        LDR     R0, [R0]
-        CMP     R0, #1
-        BNE     wait_input          ; no SD card, ignore
-
         ;; Set LED mode to alternate for dancing
         MOV     R0, #MODE_ALTERNATE
         BL      LED_SET_MODE
 
-        ;; Play SD dance 0
-        MOV     R0, #0
-        BL      SD_ReadSector
+        ;; Play VALSE
+        BL      VALSE
 
         ;; Back to idle mode
         LDR     R0, =IDLE_MODE
@@ -246,7 +239,7 @@ wait_btn1_release
         B       wait_input
 
 ;; ============================================
-;; Button 2 - SD Dance 1 (ITALODISCO)
+;; Button 2 - ITALODISCO (hardcoded)
 ;; ============================================
 do_disco
 wait_btn2_release
@@ -256,19 +249,12 @@ wait_btn2_release
 
         BL      debounce
 
-        ;; Check if SD card is available
-        LDR     R0, =SD_AVAILABLE
-        LDR     R0, [R0]
-        CMP     R0, #1
-        BNE     wait_input          ; no SD card, ignore
-
         ;; Set LED mode to alternate for dancing
         MOV     R0, #MODE_ALTERNATE
         BL      LED_SET_MODE
 
-        ;; Play SD dance 1
-        MOV     R0, #1
-        BL      SD_ReadSector
+        ;; Play ITALODISCO
+        BL      ITALODISCO
 
         ;; Back to idle mode
         LDR     R0, =IDLE_MODE

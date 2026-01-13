@@ -100,17 +100,17 @@ def stop(duration):
     return move(OFF, OFF, duration)
 
 # ============================================
-# DANCEUNKNOWN
+# DANCE2
 # ============================================
 
-DANCEUNKNOWN = [
+DANCE2 = [
     rotate_right(14),      # Rotate left for 21 units
     forward(20),          # Go forward for 10 units
     turn_left(14),        # Turn left (left off, right fwd) for 10 units
 ]
 
-VALSE_SPEED = 0x075      # Slow speed for waltz (higher = slower)
-VALSE_LED = 678         # 1 second LED period
+DANCE2_SPEED = 0x075      # Slow speed for waltz (higher = slower)
+DANCE2_LED = 678         # 1 second LED period
 
 
 # ============================================
@@ -121,14 +121,45 @@ VALSE_LED = 678         # 1 second LED period
 #   2. Both motors forward - 10 units
 #   3. Left motor off + Right motor forward (turn left) - 10 units
 
-VALSE = [
-    rotate_left(21),      # Rotate left for 21 units
+DANSE1 = [
+    rotate_left(4),      # Rotate left for 21 units
+    turn_left(20),  
+    turn_right(8),  
     forward(10),          # Go forward for 10 units
-    turn_left(10),        # Turn left (left off, right fwd) for 10 units
+    turn_left(4),  
+    turn_right(2),  
+    turn_left(4),  
+    turn_right(2),  
+    turn_left(4),  
+    turn_right(2),  
+    turn_left(4),  
+    turn_right(2),  
+    turn_left(4),  
+    turn_right(2),  
+    turn_left(4),  
+    turn_right(2),  
+    turn_left(4),  
+    turn_right(2),  
+    turn_left(4),  
+    turn_right(2),  
+    turn_left(4),  
+    turn_right(2),  
+    turn_left(4),  
+    turn_right(2),  
+    turn_left(4),  
+    turn_right(2),  
+    turn_left(4),  
+    turn_right(2),  
+    turn_left(4),  
+    turn_right(2),  
+    turn_left(4),  
+    turn_right(2),  
+    turn_left(4),  
+    turn_right(2)
 ]
 
-VALSE_SPEED = 0x155      # Slow speed for waltz (higher = slower)
-VALSE_LED = 1000         # 1 second LED period
+DANSE1_SPEED = 0x84      # Slow speed for waltz (higher = slower)
+DANSE1_LED = 298         # 1 second LED period
 
 
 # ============================================
@@ -190,46 +221,11 @@ def frontshort():
 
 
 # ============================================
-# ITALODISCO dance (converted from danses_moves.s)
-# ============================================
-# Fast disco dance with many patterns
-
-ITALODISCO = (
-    # 4x frontback
-    frontback() * 4 +
-    # 2x walk
-    walk() * 2 +
-    # 4x star
-    star() * 4 +
-    # front
-    front() +
-    # 4x star + frontback
-    star() * 4 + frontback() +
-    # walk_back, walk, frontback, frontshort
-    walk_back() + walk() + frontback() + frontshort() +
-    # 2x circle_right + demicircle_right
-    circle_right() * 2 + demicircle_right() +
-    # 3x frontback
-    frontback() * 3 +
-    # 4x walk + walk_back
-    walk() * 4 + walk_back() +
-    # demicircle patterns
-    demicircle_left() + demicircle_right() + frontback() +
-    demicircle_left() + demicircle_right() + frontback() +
-    # final frontback x2
-    frontback() * 2
-)
-
-ITALODISCO_SPEED = 0x005   # Fast speed for disco (lower = faster)
-ITALODISCO_LED = 487       # ~0.5 second LED period
-
-
-# ============================================
 # Available dances
 # ============================================
 DANCES = {
-    "valse": (VALSE, VALSE_SPEED, VALSE_LED),
-    "italodisco": (ITALODISCO, ITALODISCO_SPEED, ITALODISCO_LED),
+    "dance1": (DANSE1, DANSE1_SPEED, DANSE1_LED),
+    "dance2": (DANCE2, DANCE2_SPEED, DANCE2_LED),
 }
 
 
@@ -238,16 +234,14 @@ DANCES = {
 # ============================================
 if __name__ == "__main__":
     import sys
-
-    # Select dance from command line or default to VALSE
-    dance_name = sys.argv[1] if len(sys.argv) > 1 else "valse"
+    dance_name = sys.argv[1] if len(sys.argv) > 1 else "all"
 
     # Special case: generate combined binary with all dances
     if dance_name == "all":
         output_file = "choreo_all.bin"
         total_bytes = 0
         # TEST: Use valse twice to check if issue is with dance position
-        dance_list = ["valse", "valse"]  # Change back to ["valse", "italodisco"] after testing
+        dance_list = ["dance1", "dance2"] 
         with open(output_file, "wb") as f:
             for name in dance_list:
                 dance, speed, led = DANCES[name]
