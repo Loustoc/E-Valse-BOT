@@ -1,38 +1,34 @@
-;; sd_writer.s - SD Card Write Functions
-;; Writes embedded dance data to SD card on boot
+; sd_writer.s - ecrit les danses embedded sur la carte SD au boot
+; comme ca on peut les jouer depuis la carte
 
         AREA SD_WRITER, CODE, READONLY, ALIGN=2
 
         EXPORT SD_WriteEmbeddedDances
 
-        ;; Import SPI functions from sd_driver.s
+        ; imports des fonctions SPI du driver
         IMPORT sd_spi_send
         IMPORT sd_spi_read_R1
 
-        ;; Import embedded dance data (combined file)
+        ; les donnees des danses sont dans embedded_dances.s
         IMPORT EMBEDDED_DANCES_BASE
 
-;; Constants
 SSI0_BASE       EQU 0x40008000
 PA3_CS_ADDR     EQU 0x40004020
 
-;; Dance offsets in combined file (each dance = 1024 bytes)
-VALSE_OFFSET        EQU 0       ; Valse at offset 0
-ITALODISCO_OFFSET   EQU 1024    ; Italodisco at offset 1024
+; chaque danse fait 1024 bytes (2 secteurs de 512)
+VALSE_OFFSET        EQU 0
+ITALODISCO_OFFSET   EQU 1024
 
-;; ============================================
-;; Write_Single_Block - Write 512 bytes to SD card
-;; Input: R0 = byte address, R1 = pointer to 512 bytes of data
-;; Output: R0 = 1 (success) or 0 (failure)
-;; Uses CMD24 (0x58)
-;; ============================================
+; Write_Single_Block: ecrit 512 bytes sur la carte SD
+; R0 = adresse byte, R1 = pointeur vers les donnees
+; retourne 1 si ok, 0 si erreur
 Write_Single_Block
         PUSH    {R4-R7, LR}
-        MOV     R5, R0              ; R5 = byte address
-        MOV     R6, R1              ; R6 = data pointer
+        MOV     R5, R0              ; R5 = adresse byte
+        MOV     R6, R1              ; R6 = pointeur data
         LDR     R4, =PA3_CS_ADDR
 
-        ;; Flush RX FIFO
+        ; vide le FIFO RX
         LDR     R1, =SSI0_BASE
 WSB_FL_L
         LDR     R2, [R1, #0x00C]
@@ -42,15 +38,13 @@ WSB_FL_L
         B       WSB_FL_L
 
 WSB_S_CMD
-        ;; Pull CS low
         MOV     R3, #0
-        STR     R3, [R4]
+        STR     R3, [R4]            ; CS low
 
-        ;; Send CMD24 (0x58 = 0x40 + 0x18)
+        ; CMD24 (0x58) = write single block
         MOV     R0, #0x58
         BL      sd_spi_send
-        ;; Send 4-byte address (big-endian)
-        LSR     R0, R5, #24
+        LSR     R0, R5, #24         ; adresse en big-endian
         BL      sd_spi_send
         LSR     R0, R5, #16
         BL      sd_spi_send
@@ -58,20 +52,19 @@ WSB_S_CMD
         BL      sd_spi_send
         MOV     R0, R5
         BL      sd_spi_send
-        ;; Send dummy CRC
-        MOV     R0, #0xFF
+        MOV     R0, #0xFF           ; dummy CRC
         BL      sd_spi_send
 
-        ;; Read R1 response (must be 0x00)
+        ; attend reponse 0x00
         BL      sd_spi_read_R1
         CMP     R0, #0x00
         BNE     WSB_E_OUT
 
-        ;; Send data token (0xFE = start block)
+        ; envoie le token de debut (0xFE)
         MOV     R0, #0xFE
         BL      sd_spi_send
 
-        ;; Send 512 bytes of data
+        ; envoie les 512 bytes
         LDR     R3, =512
 WSB_DATA_LOOP
         LDRB    R0, [R6], #1
@@ -79,69 +72,64 @@ WSB_DATA_LOOP
         SUBS    R3, R3, #1
         BNE     WSB_DATA_LOOP
 
-        ;; Send 2 dummy CRC bytes
+        ; envoie le CRC (dummy)
         MOV     R0, #0xFF
         BL      sd_spi_send
         MOV     R0, #0xFF
         BL      sd_spi_send
 
-        ;; Read data response (bits 4-0: 0x05 = accepted)
+        ; lit la reponse (0x05 = accepte)
         MOV     R0, #0xFF
         BL      sd_spi_send
         AND     R0, R0, #0x1F
         CMP     R0, #0x05
         BNE     WSB_E_OUT
 
-        ;; Wait for card to finish writing (busy = 0x00)
+        ; attend que la carte finisse d'ecrire (busy = 0x00)
         LDR     R3, =500000
 WSB_BUSY_LOOP
         MOV     R0, #0xFF
         BL      sd_spi_send
         CMP     R0, #0x00
-        BNE     WSB_DONE           ; Not busy anymore
+        BNE     WSB_DONE            ; plus busy
         SUBS    R3, R3, #1
         BNE     WSB_BUSY_LOOP
-        B       WSB_E_OUT          ; Timeout
+        B       WSB_E_OUT           ; timeout
 
 WSB_DONE
-        ;; Pull CS high
         MOV     R0, #0x08
-        STR     R0, [R4]
+        STR     R0, [R4]            ; CS high
         NOP
         NOP
         NOP
-        ;; Send trailing clocks
         MOV     R0, #0xFF
-        BL      sd_spi_send
+        BL      sd_spi_send         ; trailing clock
 
-        MOV     R0, #1              ; Success
+        MOV     R0, #1              ; succes
         POP     {R4-R7, PC}
 
 WSB_E_OUT
         MOV     R0, #0x08
         STR     R0, [R4]            ; CS high
-        MOV     R0, #0              ; Failure
+        MOV     R0, #0              ; erreur
         POP     {R4-R7, PC}
 
-;; ============================================
-;; SD_WriteEmbeddedDances - Write embedded dances to SD card
-;; Writes both valse and italodisco to sectors 0-3
-;; Call after SD_Init succeeds, before SD_IndexDances
-;; ============================================
+; SD_WriteEmbeddedDances: ecrit les danses embedded sur la carte SD
+; valse dans secteurs 0-1, italodisco dans secteurs 2-3
+; a appeler apres SD_Init et avant SD_IndexDances
 SD_WriteEmbeddedDances
         PUSH    {R4-R5, LR}
 
-        ;; Get base address of embedded dances
         LDR     R4, =EMBEDDED_DANCES_BASE
 
-        ;; Write Valse header (sector 0, byte address 0)
+        ; ecrit header valse (secteur 0)
         MOV     R0, #0
         ADD     R1, R4, #VALSE_OFFSET
         BL      Write_Single_Block
         CMP     R0, #1
         BNE     WED_DONE
 
-        ;; Write Valse moves (sector 1, byte address 512)
+        ; ecrit moves valse (secteur 1)
         LDR     R0, =512
         ADD     R1, R4, #VALSE_OFFSET
         ADD     R1, R1, #512
@@ -149,14 +137,14 @@ SD_WriteEmbeddedDances
         CMP     R0, #1
         BNE     WED_DONE
 
-        ;; Write Italodisco header (sector 2, byte address 1024)
+        ; ecrit header italodisco (secteur 2)
         LDR     R0, =1024
         ADD     R1, R4, #ITALODISCO_OFFSET
         BL      Write_Single_Block
         CMP     R0, #1
         BNE     WED_DONE
 
-        ;; Write Italodisco moves (sector 3, byte address 1536)
+        ; ecrit moves italodisco (secteur 3)
         LDR     R0, =1536
         ADD     R1, R4, #ITALODISCO_OFFSET
         ADD     R1, R1, #512

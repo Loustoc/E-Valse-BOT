@@ -1,48 +1,56 @@
+; fichier avec toutes les fonctions de danse
+; chaque danse dure 90 secondes max grace au timer TICK_MS
+
 		AREA    |.text|, CODE, READONLY
-			
-		IMPORT	MOTEUR_DROIT_ON				; activer le moteur droit
-		IMPORT  MOTEUR_DROIT_OFF			; d?activer le moteur droit
-		IMPORT  MOTEUR_DROIT_AVANT			; moteur droit tourne vers l'avant
-		IMPORT  MOTEUR_DROIT_ARRIERE		; moteur droit tourne vers l'arri?re
-		IMPORT  MOTEUR_DROIT_INVERSE		; inverse le sens de rotation du moteur droit
-		
-		IMPORT	MOTEUR_GAUCHE_ON			; activer le moteur gauche
-		IMPORT  MOTEUR_GAUCHE_OFF			; d?activer le moteur gauche
-		IMPORT  MOTEUR_GAUCHE_AVANT			; moteur gauche tourne vers l'avant
-		IMPORT  MOTEUR_GAUCHE_ARRIERE		; moteur gauche tourne vers l'arri?re
-		IMPORT  MOTEUR_GAUCHE_INVERSE		; inverse le sens de rotation du moteur gauche
-			
-		IMPORT  MOTEUR_SET_VITESSE      ; Import the function
-			
-        IMPORT  LED_INIT                ; Initialize LEDs + start SysTick
-        IMPORT  LED_SET_PERIOD          ; Change blink speed
-        IMPORT  TICK_MS                 ; Millisecond counter from led.s
-			
-DUREE           EQU 0x001FFFFF
-	
-VITESSE_VALSE   EQU     0x155           ; Slow
-VITESSE_DISCO   EQU     0x005           ; Fast
-DANCE_DURATION  EQU     90000           ; 90 seconds in milliseconds (all dances)
+
+		; imports des fonctions moteur
+		IMPORT	MOTEUR_DROIT_ON
+		IMPORT  MOTEUR_DROIT_OFF
+		IMPORT  MOTEUR_DROIT_AVANT
+		IMPORT  MOTEUR_DROIT_ARRIERE
+		IMPORT  MOTEUR_DROIT_INVERSE
+
+		IMPORT	MOTEUR_GAUCHE_ON
+		IMPORT  MOTEUR_GAUCHE_OFF
+		IMPORT  MOTEUR_GAUCHE_AVANT
+		IMPORT  MOTEUR_GAUCHE_ARRIERE
+		IMPORT  MOTEUR_GAUCHE_INVERSE
+
+		IMPORT  MOTEUR_SET_VITESSE
+
+		; pour les LEDs et le timer
+        IMPORT  LED_INIT
+        IMPORT  LED_SET_PERIOD
+        IMPORT  TICK_MS                 ; compteur de millisecondes
+
+DUREE           EQU 0x001FFFFF          ; duree de base pour les boucles d'attente
+
+VITESSE_VALSE   EQU     0x155           ; vitesse lente pour la valse
+VITESSE_DISCO   EQU     0x005           ; vitesse rapide pour l'italodisco
+DANCE_DURATION  EQU     90000           ; 90 secondes en ms pour toutes les danses
 
 		EXPORT  VALSE
 
+; VALSE: danse lente qui tourne en rond
+; utilise R7 pour TICK_MS car motor.s clobber R6
 VALSE
 		PUSH    {R4-R7, LR}
 
-		;; R4 = duration in milliseconds
+		; R4 = duree max de la danse en ms
 		LDR     R4, =DANCE_DURATION
 
-		;; R7 = pointer to TICK_MS, R5 = start time (R7 safe from motor.s)
+		; R7 pointe vers TICK_MS, R5 = temps de depart
 		LDR     R7, =TICK_MS
-		LDR     R5, [R7]            ; R5 = start tick
+		LDR     R5, [R7]
 
-		;; Set speed and LED
+		; on met la vitesse lente et LED qui clignote lentement
 		LDR     R0, =VITESSE_VALSE
 		BL      MOTEUR_SET_VITESSE
 		LDR     R0, =1000
 		BL      LED_SET_PERIOD
 
 valse_start
+		; rotation: gauche arriere + droit avant
 		BL      MOTEUR_GAUCHE_ON
 		BL      MOTEUR_DROIT_ON
 		BL      MOTEUR_GAUCHE_ARRIERE
@@ -53,6 +61,7 @@ valse_w1
 		SUBS    R1, #1
 		BNE     valse_w1
 
+		; avancer tout droit
 		BL      MOTEUR_GAUCHE_AVANT
 		BL      MOTEUR_DROIT_AVANT
 
@@ -61,6 +70,7 @@ valse_w2
 		SUBS    R1, #1
 		BNE     valse_w2
 
+		; tourner a gauche (moteur gauche off)
 		BL      MOTEUR_DROIT_AVANT
 		BL      MOTEUR_GAUCHE_OFF
 
@@ -69,13 +79,13 @@ valse_w3
 		SUBS    R1, #1
 		BNE     valse_w3
 
-		;; Check if duration reached
-		LDR     R0, [R7]            ; Current tick
-		SUB     R0, R0, R5          ; Elapsed = current - start
-		CMP     R0, R4              ; Compare with duration (ms)
-		BLT     valse_start         ; Continue if not reached
+		; check si on a atteint 90 secondes
+		LDR     R0, [R7]            ; tick actuel
+		SUB     R0, R0, R5          ; temps ecoule = actuel - depart
+		CMP     R0, R4
+		BLT     valse_start         ; si pas fini on recommence
 
-		;; Stop motors and return
+		; on arrete les moteurs et on retourne
 		BL      MOTEUR_GAUCHE_OFF
 		BL      MOTEUR_DROIT_OFF
 
@@ -83,32 +93,31 @@ valse_w3
 		BX      LR
 		
 		
-; STAR		
-		
+; STAR: figure en etoile, avance recule puis tourne
 		EXPORT STAR
 STAR
 		PUSH {LR}
-		
+
+		; avancer
 		BL  MOTEUR_DROIT_ON
 		BL  MOTEUR_GAUCHE_AVANT
 		BL  MOTEUR_DROIT_AVANT
-	
+
         LDR R1, =DUREE*1
 star_w1
         SUBS R1, #1
         BNE  star_w1
-   
-   
-   
+
+		; reculer
 		BL  MOTEUR_GAUCHE_ARRIERE
 		BL  MOTEUR_DROIT_ARRIERE
-	
+
         LDR R1, =DUREE*1
 star_w2
         SUBS R1, #1
         BNE  star_w2
-   
-		
+
+		; tourner (moteur droit off)
 		BL  MOTEUR_DROIT_OFF
 		BL  MOTEUR_GAUCHE_AVANT
 		BL  MOTEUR_DROIT_ARRIERE
@@ -118,94 +127,87 @@ star_w3
 		SUBS R1, #1
 		BNE  star_w3
 		BL  MOTEUR_DROIT_ON
-		
-		
+
 		POP {LR}
         BX  LR
 		
 		
-;CIRCLE_RIGHT
+; CIRCLE_RIGHT: tourne sur place vers la droite
 		EXPORT CIRCLE_RIGHT
-CIRCLE_RIGHT		
-		
+CIRCLE_RIGHT
 		PUSH {LR}
-		
+
 		BL  MOTEUR_GAUCHE_ARRIERE
 		BL  MOTEUR_DROIT_AVANT
-	
+
         LDR R1, =DUREE*6
 cr_wait
         SUBS R1, #1
         BNE  cr_wait
-		
+
 		POP {LR}
         BX  LR
-		
-		
-;CIRCLE_LEFT
+
+
+; CIRCLE_LEFT: tourne sur place vers la gauche
 		EXPORT CIRCLE_LEFT
 CIRCLE_LEFT
-		
 		PUSH {LR}
-		
+
 		BL  MOTEUR_DROIT_ARRIERE
 		BL  MOTEUR_GAUCHE_AVANT
-	
+
         LDR R1, =DUREE*6
 cl_wait
         SUBS R1, #1
         BNE  cl_wait
-		
+
 		POP {LR}
         BX  LR
 
 
-
-
-;DEMICIRCLE_RIGHT
+; DEMICIRCLE_RIGHT: demi tour vers la droite
 		EXPORT DEMICIRCLE_RIGHT
-DEMICIRCLE_RIGHT		
-		
+DEMICIRCLE_RIGHT
 		PUSH {LR}
-		
+
 		BL  MOTEUR_GAUCHE_ARRIERE
 		BL  MOTEUR_DROIT_AVANT
-	
+
         LDR R1, =DUREE*3
 dcr_wait
         SUBS R1, #1
         BNE  dcr_wait
-		
+
 		POP {LR}
         BX  LR
-		
-		
-;DEMICIRCLE_LEFT
+
+
+; DEMICIRCLE_LEFT: demi tour vers la gauche
 		EXPORT DEMICIRCLE_LEFT
 DEMICIRCLE_LEFT
-		
 		PUSH {LR}
-		
+
 		BL  MOTEUR_DROIT_ARRIERE
 		BL  MOTEUR_GAUCHE_AVANT
-	
+
         LDR R1, =DUREE*3
 dcl_wait
         SUBS R1, #1
         BNE  dcl_wait
-		
+
 		POP {LR}
         BX  LR
 		
 
 
 
-;WALK
+; WALK: marche en zigzag (avance puis corrige a droite puis a gauche)
 		EXPORT WALK
 WALK
 		PUSH {LR}
 
-
+		; avancer
 		 BL  MOTEUR_GAUCHE_AVANT
 		 BL  MOTEUR_DROIT_AVANT
 
@@ -213,17 +215,17 @@ WALK
 walk_w1
          SUBS R1, #1
          BNE  walk_w1
-		 
-		 
+
+		; correction a droite
 		BL  MOTEUR_DROIT_AVANT
 		BL  MOTEUR_GAUCHE_ARRIERE
-	
+
 		LDR R1, =(DUREE*3)/2
 walk_w2
         SUBS R1, #1
-        BNE  walk_w2	
+        BNE  walk_w2
 
-
+		; avancer
 		 BL  MOTEUR_GAUCHE_AVANT
 		 BL  MOTEUR_DROIT_AVANT
 
@@ -231,20 +233,16 @@ walk_w2
 walk_w3
          SUBS R1, #1
          BNE  walk_w3
-		 
-		 
+
+		; correction a gauche
 		BL  MOTEUR_DROIT_ARRIERE
 		BL  MOTEUR_GAUCHE_AVANT
-	
+
 		LDR R1, =(DUREE*3)/2
 walk_w4
         SUBS R1, #1
-        BNE  walk_w4	
-		
-		
-		
-		
-		
+        BNE  walk_w4
+
 		POP {LR}
         BX  LR
 		
@@ -252,12 +250,12 @@ walk_w4
 		
 		
 		
-;WALK ON BACK
+; WALK_BACK: marche arriere en zigzag
 		EXPORT WALK_BACK
 WALK_BACK
 		PUSH {LR}
 
-
+		; reculer
 		 BL  MOTEUR_GAUCHE_ARRIERE
 		 BL  MOTEUR_DROIT_ARRIERE
 
@@ -265,17 +263,17 @@ WALK_BACK
 wb_w1
          SUBS R1, #1
          BNE  wb_w1
-		 
-		 
+
+		; correction
 		BL  MOTEUR_DROIT_ARRIERE
 		BL  MOTEUR_GAUCHE_AVANT
-	
+
 		LDR R1, =(DUREE*3)/2
 wb_w2
         SUBS R1, #1
-        BNE  wb_w2	
+        BNE  wb_w2
 
-
+		; reculer
 		 BL  MOTEUR_GAUCHE_ARRIERE
 		 BL  MOTEUR_DROIT_ARRIERE
 
@@ -283,17 +281,16 @@ wb_w2
 wb_w3
          SUBS R1, #1
          BNE  wb_w3
-		 
-		 
+
+		; correction
 		BL  MOTEUR_DROIT_AVANT
 		BL  MOTEUR_GAUCHE_ARRIERE
-	
+
 		LDR R1, =(DUREE*3)/2
 wb_w4
         SUBS R1, #1
-        BNE  wb_w4	
-		
-		
+        BNE  wb_w4
+
 		POP {LR}
         BX  LR
 
@@ -301,133 +298,132 @@ wb_w4
 
 
 
+; FRONTBACK: avance puis recule (mouvement de va et vient)
 		EXPORT FRONTBACK
 FRONTBACK
 		PUSH {LR}
-		
+
 		BL  MOTEUR_DROIT_AVANT
 		BL  MOTEUR_GAUCHE_AVANT
-	
+
 		LDR R1, =DUREE*1
 fb_w1
         SUBS R1, #1
-        BNE  fb_w1	
-		
-		
+        BNE  fb_w1
+
 		BL  MOTEUR_DROIT_ARRIERE
 		BL  MOTEUR_GAUCHE_ARRIERE
-	
+
 		LDR R1, =DUREE*1
 fb_w2
         SUBS R1, #1
-        BNE  fb_w2	
-
-
+        BNE  fb_w2
 
 		POP {LR}
         BX  LR
 
 
+; FRONT: avance tout droit pendant un moment
 		EXPORT FRONT
 FRONT
 		PUSH {LR}
-		
+
 		BL  MOTEUR_GAUCHE_ARRIERE
 		BL  MOTEUR_DROIT_ARRIERE
-	
+
         LDR R1, =DUREE*4
 front_w
         SUBS R1, #1
         BNE  front_w
-		
-		
+
 		POP {LR}
         BX  LR
 
+; FRONTSHORT: avance tout droit mais moins longtemps
 		EXPORT FRONTSHORT
 FRONTSHORT
 		PUSH {LR}
-		
+
 		BL  MOTEUR_GAUCHE_ARRIERE
 		BL  MOTEUR_DROIT_ARRIERE
-	
+
         LDR R1, =DUREE*2
 fs_wait
         SUBS R1, #1
         BNE  fs_wait
-		
-		
+
 		POP {LR}
         BX  LR
 
 		
-;; ============================================
-;; DEBUG_PAUSE - Stop motors, fast blink 3 sec, restore
-;; R8 = saved PWMENABLE, R9 = saved right dir, R10 = saved left dir
-;; ============================================
-DBG_PWMENABLE   EQU     0x40028008      ; PWM enable register
-DBG_DIR_RIGHT   EQU     0x40007008      ; GPIODATA_D + (GPIO_1<<2)
-DBG_DIR_LEFT    EQU     0x40027008      ; GPIODATA_H + (GPIO_1<<2)
+; DEBUG_PAUSE: pour debugger, arrete les moteurs 3 sec avec LED rapide
+; sauvegarde et restaure l'etat des moteurs
+DBG_PWMENABLE   EQU     0x40028008      ; registre PWM enable
+DBG_DIR_RIGHT   EQU     0x40007008      ; direction moteur droit
+DBG_DIR_LEFT    EQU     0x40027008      ; direction moteur gauche
 
 DEBUG_PAUSE
 		PUSH    {R8-R10, LR}
 
-		;; Save motor on/off state (PWMENABLE)
+		; sauvegarde l'etat des moteurs (on/off)
 		LDR     R0, =DBG_PWMENABLE
 		LDR     R8, [R0]
 
-		;; Save right motor direction
+		; sauvegarde direction moteur droit
 		LDR     R0, =DBG_DIR_RIGHT
 		LDR     R9, [R0]
 
-		;; Save left motor direction
+		; sauvegarde direction moteur gauche
 		LDR     R0, =DBG_DIR_LEFT
 		LDR     R10, [R0]
 
-		;; Stop both motors
+		; arrete les deux moteurs
 		BL      MOTEUR_GAUCHE_OFF
 		BL      MOTEUR_DROIT_OFF
 
-		;; Set LED to fast blink (50ms)
+		; LED clignote vite pour montrer qu'on est en pause
 		MOV     R0, #50
 		BL      LED_SET_PERIOD
 
-		;; Wait 3 seconds
+		; on attend 3 secondes
 		LDR     R1, =0x900000
 dbg_wait
 		SUBS    R1, #1
 		BNE     dbg_wait
 
-		;; Restore normal LED period (487ms)
+		; remet la LED normale
 		LDR     R0, =487
 		BL      LED_SET_PERIOD
 
-		;; Restore right motor direction
+		; restaure direction moteur droit
 		LDR     R0, =DBG_DIR_RIGHT
 		STR     R9, [R0]
 
-		;; Restore left motor direction
+		; restaure direction moteur gauche
 		LDR     R0, =DBG_DIR_LEFT
 		STR     R10, [R0]
 
-		;; Restore motor on/off state
+		; restaure l'etat on/off des moteurs
 		LDR     R0, =DBG_PWMENABLE
 		STR     R8, [R0]
 
 		POP     {R8-R10, LR}
 		BX      LR
 
+; ITALODISCO: danse rapide avec plein de figures enchainees
+; meme principe que VALSE pour le timer avec R7
 		EXPORT ITALODISCO
 ITALODISCO
 		PUSH    {R4-R7, LR}
 
-		;; R4 = duration in milliseconds
+		; R4 = duree max en ms
 		LDR     R4, =DANCE_DURATION
 
-		;; R7 = pointer to TICK_MS, R5 = start time (R7 safe from motor.s)
+		; R7 pointe vers TICK_MS, R5 = temps de depart
 		LDR     R7, =TICK_MS
-		LDR     R5, [R7]            ; R5 = start tick
+		LDR     R5, [R7]
 
+		; vitesse rapide pour le disco
 		LDR     R0, =VITESSE_DISCO
 		BL      MOTEUR_SET_VITESSE
 
@@ -435,114 +431,71 @@ ITALODISCO
 		BL      LED_SET_PERIOD
 
 disco_start
-		;; Turn motors on and go forward
+		; allume les moteurs et en avant
 		BL      MOTEUR_GAUCHE_ON
 		BL      MOTEUR_DROIT_ON
 		BL      MOTEUR_GAUCHE_AVANT
 		BL      MOTEUR_DROIT_AVANT
 
+		; sequence de mouvements
 		BL      FRONTBACK
-	
 		BL      FRONTBACK
-	
 		BL      FRONTBACK
-	
 		BL      FRONTBACK
-	
 
 		BL      WALK
-	
 		BL      WALK
-	
-
 
 		BL      STAR
-	
 		BL      STAR
-	
 		BL      STAR
-	
 		BL      STAR
-	
 		BL      MOTEUR_DROIT_ON
 
-
 		BL      FRONT
-	
-
 
 		BL      STAR
-	
 		BL      STAR
-	
 		BL      STAR
-	
 		BL      STAR
-	
 		BL      FRONTBACK
-	
 
 		BL      WALK_BACK
-	
 		BL      WALK
-	
 		BL      FRONTBACK
-	
 		BL      FRONTSHORT
-	
-
 
 		BL      CIRCLE_RIGHT
-	
 		BL      CIRCLE_RIGHT
-	
 		BL      DEMICIRCLE_RIGHT
-	
-
 
 		BL      FRONTBACK
-	
 		BL      FRONTBACK
-	
 		BL      FRONTBACK
-	
 
 		BL      WALK
-	
 		BL      WALK
-	
 		BL      WALK
-	
 		BL      WALK_BACK
-	
 
 		BL      DEMICIRCLE_LEFT
-	
 		BL      DEMICIRCLE_RIGHT
-	
 		BL      FRONTBACK
-	
 		BL      DEMICIRCLE_LEFT
-	
 		BL      DEMICIRCLE_RIGHT
-	
 		BL      FRONTBACK
-	
-
 
 		BL      MOTEUR_DROIT_OFF
 		BL      FRONTBACK
-	
 		BL      FRONTBACK
-	
 
-		;; Check if duration reached
-		LDR     R0, [R7]            ; Current tick
-		SUB     R0, R0, R5          ; Elapsed = current - start
-		CMP     R0, R4              ; Compare with duration (ms)
-		BLT     disco_start         ; Continue if not reached
+		; check si on a atteint 90 secondes
+		LDR     R0, [R7]
+		SUB     R0, R0, R5
+		CMP     R0, R4
+		BLT     disco_start         ; si pas fini on recommence
 
-		;; Stop motors and return
+		; arrete les moteurs et retourne
 		BL      MOTEUR_GAUCHE_OFF
 		BL      MOTEUR_DROIT_OFF
 
