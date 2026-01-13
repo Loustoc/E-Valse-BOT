@@ -100,12 +100,8 @@ def stop(duration):
     return move(OFF, OFF, duration)
 
 # ============================================
-# VALSE dance (converted from danses_moves.s)
+# DANCEUNKNOWN
 # ============================================
-# Original VALSE (slow waltz):
-#   1. Left motor backward + Right motor forward (rotate left) - 21 units
-#   2. Both motors forward - 10 units
-#   3. Left motor off + Right motor forward (turn left) - 10 units
 
 DANCEUNKNOWN = [
     rotate_right(14),      # Rotate left for 21 units
