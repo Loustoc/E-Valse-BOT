@@ -119,11 +119,6 @@ star_w3
 		BNE  star_w3
 		BL  MOTEUR_DROIT_ON
 		
-		BL	MOTEUR_DROIT_OFF
-		BL 	MOTEUR_GAUCHE_OFF
-		
-		
-		
 		
 		POP {LR}
         BX  LR
@@ -366,6 +361,62 @@ fs_wait
         BX  LR
 
 		
+;; ============================================
+;; DEBUG_PAUSE - Stop motors, fast blink 3 sec, restore
+;; R8 = saved PWMENABLE, R9 = saved right dir, R10 = saved left dir
+;; ============================================
+DBG_PWMENABLE   EQU     0x40028008      ; PWM enable register
+DBG_DIR_RIGHT   EQU     0x40007008      ; GPIODATA_D + (GPIO_1<<2)
+DBG_DIR_LEFT    EQU     0x40027008      ; GPIODATA_H + (GPIO_1<<2)
+
+DEBUG_PAUSE
+		PUSH    {R8-R10, LR}
+
+		;; Save motor on/off state (PWMENABLE)
+		LDR     R0, =DBG_PWMENABLE
+		LDR     R8, [R0]
+
+		;; Save right motor direction
+		LDR     R0, =DBG_DIR_RIGHT
+		LDR     R9, [R0]
+
+		;; Save left motor direction
+		LDR     R0, =DBG_DIR_LEFT
+		LDR     R10, [R0]
+
+		;; Stop both motors
+		BL      MOTEUR_GAUCHE_OFF
+		BL      MOTEUR_DROIT_OFF
+
+		;; Set LED to fast blink (50ms)
+		MOV     R0, #50
+		BL      LED_SET_PERIOD
+
+		;; Wait 3 seconds
+		LDR     R1, =0x900000
+dbg_wait
+		SUBS    R1, #1
+		BNE     dbg_wait
+
+		;; Restore normal LED period (487ms)
+		LDR     R0, =487
+		BL      LED_SET_PERIOD
+
+		;; Restore right motor direction
+		LDR     R0, =DBG_DIR_RIGHT
+		STR     R9, [R0]
+
+		;; Restore left motor direction
+		LDR     R0, =DBG_DIR_LEFT
+		STR     R10, [R0]
+
+		;; Restore motor on/off state
+		LDR     R0, =DBG_PWMENABLE
+		STR     R8, [R0]
+
+		POP     {R8-R10, LR}
+		BX      LR
+
 		EXPORT ITALODISCO
 ITALODISCO
 		PUSH    {R4-R7, LR}
@@ -388,64 +439,102 @@ disco_start
 		BL      MOTEUR_GAUCHE_ON
 		BL      MOTEUR_DROIT_ON
 		BL      MOTEUR_GAUCHE_AVANT
-		BL      MOTEUR_DROIT_AVANT	
-		
-		BL FRONTBACK
-		BL FRONTBACK
-		BL FRONTBACK
-		BL FRONTBACK
-		
-		BL WALK
-		BL WALK
-		
-		
-		BL STAR
-		BL STAR
-		BL STAR
-		BL STAR
-		BL MOTEUR_DROIT_ON
-		
+		BL      MOTEUR_DROIT_AVANT
+
+		BL      FRONTBACK
 	
-		BL  FRONT
-		
-		
-		BL STAR
-		BL STAR
-		BL STAR
-		BL STAR
-		BL FRONTBACK
-		
-		BL WALK_BACK
-		BL WALK 
-		BL FRONTBACK
-		BL FRONTSHORT
-		
-		
-		BL CIRCLE_RIGHT
-		BL CIRCLE_RIGHT
-		BL DEMICIRCLE_RIGHT
-		
-		
-		BL FRONTBACK
-		BL FRONTBACK
-		BL FRONTBACK
-		
-		BL WALK
-		BL WALK 
-		BL WALK	
-		BL WALK_BACK
-		
-		BL DEMICIRCLE_LEFT
-		BL DEMICIRCLE_RIGHT
-		BL FRONTBACK
-		BL DEMICIRCLE_LEFT
-		BL DEMICIRCLE_RIGHT
-		BL FRONTBACK
-		
-		
-		BL MOTEUR_DROIT_OFF
-		BL FRONTBACK
-		BL FRONTBACK
+		BL      FRONTBACK
+	
+		BL      FRONTBACK
+	
+		BL      FRONTBACK
+	
+
+		BL      WALK
+	
+		BL      WALK
+	
+
+
+		BL      STAR
+	
+		BL      STAR
+	
+		BL      STAR
+	
+		BL      STAR
+	
+		BL      MOTEUR_DROIT_ON
+
+
+		BL      FRONT
+	
+
+
+		BL      STAR
+	
+		BL      STAR
+	
+		BL      STAR
+	
+		BL      STAR
+	
+		BL      FRONTBACK
+	
+
+		BL      WALK_BACK
+	
+		BL      WALK
+	
+		BL      FRONTBACK
+	
+		BL      FRONTSHORT
+	
+
+
+		BL      CIRCLE_RIGHT
+	
+		BL      CIRCLE_RIGHT
+	
+		BL      DEMICIRCLE_RIGHT
+	
+
+
+		BL      FRONTBACK
+	
+		BL      FRONTBACK
+	
+		BL      FRONTBACK
+	
+
+		BL      WALK
+	
+		BL      WALK
+	
+		BL      WALK
+	
+		BL      WALK_BACK
+	
+
+		BL      DEMICIRCLE_LEFT
+	
+		BL      DEMICIRCLE_RIGHT
+	
+		BL      FRONTBACK
+	
+		BL      DEMICIRCLE_LEFT
+	
+		BL      DEMICIRCLE_RIGHT
+	
+		BL      FRONTBACK
+	
+
+
+		BL      MOTEUR_DROIT_OFF
+		BL      FRONTBACK
+	
+		BL      FRONTBACK
+	
 
 		;; Check if duration reached
 		LDR     R0, [R7]            ; Current tick
