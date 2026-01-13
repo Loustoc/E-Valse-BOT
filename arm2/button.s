@@ -29,17 +29,22 @@ BUTTON_INIT
         NOP
         
         LDR     R1, =GPIO_PORTD
-        
+
+        ; Clear alternate function (use as GPIO)
+        LDR     R0, [R1, #0x420]
+        BIC     R0, R0, #SW_BOTH
+        STR     R0, [R1, #0x420]
+
         ; PD6, PD7 as input (DIR = 0)
         LDR     R0, [R1, #0x400]
         BIC     R0, R0, #SW_BOTH
         STR     R0, [R1, #0x400]
-        
+
         ; Pull-up enabled
         LDR     R0, [R1, #0x510]
         ORR     R0, R0, #SW_BOTH
         STR     R0, [R1, #0x510]
-        
+
         ; Digital enable
         LDR     R0, [R1, #0x51C]
         ORR     R0, R0, #SW_BOTH

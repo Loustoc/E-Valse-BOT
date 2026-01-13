@@ -405,12 +405,6 @@
               <FilePath>.\main.s</FilePath>
             </File>
             <File>
-              <FileName>led.s</FileName>
-              <FileName>main.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>.\main.s</FilePath>
-            </File>
-            <File>
               <FileName>sd_driver.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\sd_driver.s</FilePath>

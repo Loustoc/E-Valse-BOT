@@ -1,42 +1,261 @@
 import struct
 
-direction_map = {
-    "R": 0b00, # Droite
-    "L": 0b01, # Gauche
-    "F": 0b10, # Avant
-    "B": 0b11, # Arrière
-}
+# Motor states
+OFF = 0b00  # Motor off
+FWD = 0b01  # Motor forward
+BCK = 0b10  # Motor backward
 
-def create_dance_blocks(moves):
-    """Génère deux blocs de 512 octets : Header + Mouvements"""
-    
+def move(left_motor, right_motor, duration):
+    """
+    Create a move tuple.
+
+    Args:
+        left_motor: OFF, FWD, or BCK
+        right_motor: OFF, FWD, or BCK
+        duration: 0-255 time units
+
+    Returns:
+        Tuple of (motor_byte, duration)
+    """
+    motor_byte = (left_motor << 2) | right_motor
+    return (motor_byte, min(duration, 255))
+
+def create_dance_blocks(moves, motor_speed=0x155, led_period=500):
+    """
+    Generate two 512-byte blocks: Header + Moves
+
+    Header format (v3):
+        Offset 0-3:   "STEP" (magic)
+        Offset 4-5:   Version (0x0003)
+        Offset 6-7:   Number of moves
+        Offset 8-9:   Motor speed (PWM 0x000-0x3FF)
+        Offset 10-11: LED blink period (ms)
+        Offset 12-511: Padding (zeros)
+
+    Moves format (2 bytes per move):
+        Byte 1: Motor control
+            Bits 3-2: Left motor  (00=off, 01=fwd, 10=back)
+            Bits 1-0: Right motor (00=off, 01=fwd, 10=back)
+        Byte 2: Duration (0-255)
+
+        End marker: 0xFF 0xFF
+    """
     magic = b"STEP"
-    version = 0x0001
+    version = 0x0003
     num_moves = len(moves)
-    header = magic + struct.pack(">H", version) + struct.pack(">H", num_moves)
+
+    header = (
+        magic +
+        struct.pack(">H", version) +
+        struct.pack(">H", num_moves) +
+        struct.pack(">H", motor_speed) +
+        struct.pack(">H", led_period)
+    )
     header_block = header + b"\x00" * (512 - len(header))
 
-    seq_bytes = bytearray()
-    for dir_char, duration in moves:
-        if dir_char not in direction_map:
-            raise ValueError(f"Direction invalide: {dir_char}")
-        byte = (direction_map[dir_char] << 6) | (min(duration, 63) & 0x3F)
-        seq_bytes.append(byte)
-    
-    if len(seq_bytes) < 512:
-        seq_bytes.append(0xFF)
-        
-    seq_block = seq_bytes + b"\x00" * (512 - len(seq_bytes))
-    
-    return header_block + seq_block
+    # Build moves block (2 bytes per move)
+    moves_bytes = bytearray()
+    for motor_byte, duration in moves:
+        moves_bytes.append(motor_byte)
+        moves_bytes.append(duration)
 
-danse_1 = [("F", 10), ("R", 5), ("F", 10), ("L", 5), ("B", 10)]
-danse_2 = [("R", 20), ("R", 20), ("R", 20), ("R", 20)]         
-danse_3 = [("F", 5), ("B", 5), ("F", 5), ("B", 5), ("F", 30)]
+    # Add end marker
+    moves_bytes.append(0xFF)
+    moves_bytes.append(0xFF)
 
-all_dances = [danse_1, danse_2, danse_3]
+    moves_block = bytes(moves_bytes) + b"\x00" * (512 - len(moves_bytes))
 
-with open("choreo.bin", "wb") as f:
-    for i, moves in enumerate(all_dances):
-        binary_data = create_dance_blocks(moves)
+    return header_block + moves_block
+
+
+# ============================================
+# Helper moves for creating dances
+# ============================================
+def forward(duration):
+    """Both motors forward"""
+    return move(FWD, FWD, duration)
+
+def backward(duration):
+    """Both motors backward"""
+    return move(BCK, BCK, duration)
+
+def rotate_left(duration):
+    """Left backward + Right forward"""
+    return move(BCK, FWD, duration)
+
+def rotate_right(duration):
+    """Left forward + Right backward"""
+    return move(FWD, BCK, duration)
+
+def turn_left(duration):
+    """Right motor only"""
+    return move(OFF, FWD, duration)
+
+def turn_right(duration):
+    """Left motor only"""
+    return move(FWD, OFF, duration)
+
+def stop(duration):
+    """Both motors off (pause)"""
+    return move(OFF, OFF, duration)
+
+
+# ============================================
+# VALSE dance (converted from danses_moves.s)
+# ============================================
+# Original VALSE (slow waltz):
+#   1. Left motor backward + Right motor forward (rotate left) - 21 units
+#   2. Both motors forward - 10 units
+#   3. Left motor off + Right motor forward (turn left) - 10 units
+
+VALSE = [
+    rotate_left(21),      # Rotate left for 21 units
+    forward(10),          # Go forward for 10 units
+    turn_left(10),        # Turn left (left off, right fwd) for 10 units
+]
+
+VALSE_SPEED = 0x155      # Slow speed for waltz (higher = slower)
+VALSE_LED = 1000         # 1 second LED period
+
+
+# ============================================
+# Component moves for ITALODISCO
+# ============================================
+def frontback():
+    """Forward then backward"""
+    return [forward(1), backward(1)]
+
+def walk():
+    """Walk pattern: forward, rotate right, forward, rotate left"""
+    return [
+        forward(1),
+        rotate_right(1),  # Note: duration ~1.5 in original, using 1
+        forward(1),
+        rotate_left(1),
+    ]
+
+def walk_back():
+    """Walk backward pattern"""
+    return [
+        backward(1),
+        rotate_left(1),
+        backward(1),
+        rotate_right(1),
+    ]
+
+def star():
+    """Star pattern"""
+    return [
+        forward(1),
+        backward(1),
+        move(FWD, BCK, 3),  # Left fwd + Right back
+    ]
+
+def circle_right(duration=6):
+    """Circle right: left backward + right forward"""
+    return [rotate_left(duration)]
+
+def circle_left(duration=6):
+    """Circle left: left forward + right backward"""
+    return [rotate_right(duration)]
+
+def demicircle_right():
+    """Half circle right"""
+    return circle_right(3)
+
+def demicircle_left():
+    """Half circle left"""
+    return circle_left(3)
+
+def front(duration=4):
+    """Go backward (robot moves forward)"""
+    return [backward(duration)]
+
+def frontshort():
+    """Short forward"""
+    return front(2)
+
+
+# ============================================
+# ITALODISCO dance (converted from danses_moves.s)
+# ============================================
+# Fast disco dance with many patterns
+
+ITALODISCO = (
+    # 4x frontback
+    frontback() * 4 +
+    # 2x walk
+    walk() * 2 +
+    # 4x star
+    star() * 4 +
+    # front
+    front() +
+    # 4x star + frontback
+    star() * 4 + frontback() +
+    # walk_back, walk, frontback, frontshort
+    walk_back() + walk() + frontback() + frontshort() +
+    # 2x circle_right + demicircle_right
+    circle_right() * 2 + demicircle_right() +
+    # 3x frontback
+    frontback() * 3 +
+    # 4x walk + walk_back
+    walk() * 4 + walk_back() +
+    # demicircle patterns
+    demicircle_left() + demicircle_right() + frontback() +
+    demicircle_left() + demicircle_right() + frontback() +
+    # final frontback x2
+    frontback() * 2
+)
+
+ITALODISCO_SPEED = 0x005   # Fast speed for disco (lower = faster)
+ITALODISCO_LED = 487       # ~0.5 second LED period
+
+
+# ============================================
+# Available dances
+# ============================================
+DANCES = {
+    "valse": (VALSE, VALSE_SPEED, VALSE_LED),
+    "italodisco": (ITALODISCO, ITALODISCO_SPEED, ITALODISCO_LED),
+}
+
+
+# ============================================
+# Generate the binary file
+# ============================================
+if __name__ == "__main__":
+    import sys
+
+    # Select dance from command line or default to VALSE
+    dance_name = sys.argv[1] if len(sys.argv) > 1 else "valse"
+
+    if dance_name not in DANCES:
+        print(f"Unknown dance: {dance_name}")
+        print(f"Available dances: {', '.join(DANCES.keys())}")
+        sys.exit(1)
+
+    dance, motor_speed, led_period = DANCES[dance_name]
+
+    output_file = f"choreo_{dance_name}.bin"
+    with open(output_file, "wb") as f:
+        binary_data = create_dance_blocks(dance, motor_speed, led_period)
         f.write(binary_data)
+
+    print(f"Created {output_file} ({len(binary_data)} bytes)")
+    print(f"  Dance: {dance_name.upper()}")
+    print(f"  Version: 3 (2-byte motor format)")
+    print(f"  Motor speed: 0x{motor_speed:03X} ({'slow' if motor_speed > 0x100 else 'fast'})")
+    print(f"  LED period: {led_period}ms")
+    print(f"  Moves: {len(dance)}")
+    print()
+    print("Move details:")
+    for i, (motor, dur) in enumerate(dance):
+        left = (motor >> 2) & 0x03
+        right = motor & 0x03
+        left_str = ["OFF", "FWD", "BCK", "???"][left]
+        right_str = ["OFF", "FWD", "BCK", "???"][right]
+        print(f"  {i+1:3}. L={left_str:3} R={right_str:3} dur={dur}")
+
+    print()
+    print("To write to SD card:")
+    print(f"  dd if={output_file} of=/dev/sdX bs=512")

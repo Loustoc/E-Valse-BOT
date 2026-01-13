@@ -11,7 +11,12 @@ Section Cross References
     main.o(.text) refers to led.o(.text) for LED_INIT
     main.o(.text) refers to bumpers.o(.text) for BUMPER_INIT
     main.o(.text) refers to button.o(.text) for BUTTON_INIT
+    main.o(.text) refers to sd_driver.o(SD_DRIVER) for SD_Init
     main.o(.text) refers to danses_moves.o(.text) for VALSE
+    main.o(.text) refers to main.o(.data) for SD_AVAILABLE
+    sd_driver.o(SD_DRIVER) refers to motor.o(.text) for MOTEUR_SET_VITESSE
+    sd_driver.o(SD_DRIVER) refers to led.o(.text) for LED_SET_PERIOD
+    sd_driver.o(SD_DRIVER) refers to sd_driver.o(SD_DATA) for DANCE_TABLE
     led.o(.text) refers to led.o(.data) for TICK_MS
     danses_moves.o(.text) refers (Special) to led.o(.text) for LED_INIT
     danses_moves.o(.text) refers (Special) to motor.o(.text) for MOTEUR_DROIT_INVERSE
@@ -23,8 +28,9 @@ Removing Unused input sections from the image.
 
     Removing startup.o(HEAP), (0 bytes).
     Removing startup.o(.text), (0 bytes).
+    Removing switch.o(.text), (64 bytes).
 
-2 unused section(s) (total 0 bytes) removed from the image.
+3 unused section(s) (total 64 bytes) removed from the image.
 
 ==============================================================================
 
@@ -47,15 +53,28 @@ Image Symbol Table
     NmiSR                                    0x00000271   Thumb Code     0  startup.o(RESET)
     FaultISR                                 0x00000273   Thumb Code     0  startup.o(RESET)
     IntDefaultHandler                        0x00000275   Thumb Code     0  startup.o(RESET)
-    .text                                    0x00000278   Section      484  motor.o(.text)
-    .text                                    0x0000045c   Section       64  switch.o(.text)
-    .text                                    0x0000049c   Section      116  main.o(.text)
-    .text                                    0x00000510   Section       40  led.o(.text)
-    SD_DRIVER                                0x00000538   Section      816  sd_driver.o(SD_DRIVER)
-    DANCE_TABLE                              0x20000000   Data          80  sd_driver.o(SD_DATA)
-    SD_DATA                                  0x20000000   Section       84  sd_driver.o(SD_DATA)
-    StackMem                                 0x20000058   Data           0  startup.o(STACK)
-    STACK                                    0x20000058   Section      256  startup.o(STACK)
+    .text                                    0x00000278   Section      496  motor.o(.text)
+    .text                                    0x00000468   Section      292  main.o(.text)
+    .text                                    0x0000058c   Section      524  led.o(.text)
+    .text                                    0x00000798   Section      672  danses_moves.o(.text)
+    .text                                    0x00000a38   Section      132  button.o(.text)
+    .text                                    0x00000abc   Section      120  bumpers.o(.text)
+    SD_DRIVER                                0x00000b34   Section      896  sd_driver.o(SD_DRIVER)
+    SD_AVAILABLE                             0x20000000   Data           4  main.o(.data)
+    .data                                    0x20000000   Section        8  main.o(.data)
+    IDLE_MODE                                0x20000004   Data           4  main.o(.data)
+    .data                                    0x20000008   Section       32  led.o(.data)
+    LED1_STATE                               0x2000000c   Data           4  led.o(.data)
+    LED2_STATE                               0x20000010   Data           4  led.o(.data)
+    LED1_LAST_TOG                            0x20000014   Data           4  led.o(.data)
+    LED2_LAST_TOG                            0x20000018   Data           4  led.o(.data)
+    LED_PERIOD                               0x2000001c   Data           4  led.o(.data)
+    LED_MULTIPLIER                           0x20000020   Data           4  led.o(.data)
+    LED_MODE                                 0x20000024   Data           4  led.o(.data)
+    DANCE_TABLE                              0x20000028   Data          80  sd_driver.o(SD_DATA)
+    SD_DATA                                  0x20000028   Section       84  sd_driver.o(SD_DATA)
+    StackMem                                 0x20000080   Data           0  startup.o(STACK)
+    STACK                                    0x20000080   Section      256  startup.o(STACK)
 
     Global Symbols
 
@@ -75,16 +94,38 @@ Image Symbol Table
     MOTEUR_GAUCHE_AVANT                      0x000003cb   Thumb Code     0  motor.o(.text)
     MOTEUR_DROIT_INVERSE                     0x000003d5   Thumb Code     0  motor.o(.text)
     MOTEUR_GAUCHE_INVERSE                    0x000003e1   Thumb Code     0  motor.o(.text)
-    SWITCH_INIT                              0x0000045d   Thumb Code     0  switch.o(.text)
-    READ_SWITCH                              0x00000489   Thumb Code     0  switch.o(.text)
-    __main                                   0x0000049d   Thumb Code     0  main.o(.text)
-    L_LED_ON                                 0x00000511   Thumb Code     0  led.o(.text)
-    R_LED_ON                                 0x00000523   Thumb Code     0  led.o(.text)
-    SD_IndexDances                           0x00000539   Thumb Code     0  sd_driver.o(SD_DRIVER)
-    SD_Init                                  0x000005d3   Thumb Code     0  sd_driver.o(SD_DRIVER)
-    SD_ReadSector                            0x000006ad   Thumb Code     0  sd_driver.o(SD_DRIVER)
-    DANCE_COUNT                              0x20000050   Data           4  sd_driver.o(SD_DATA)
-    __initial_sp                             0x20000158   Data           0  startup.o(STACK)
+    MOTEUR_SET_VITESSE                       0x000003ed   Thumb Code     0  motor.o(.text)
+    __main                                   0x00000469   Thumb Code     0  main.o(.text)
+    LED_INIT                                 0x0000058d   Thumb Code     0  led.o(.text)
+    SysTick_Handler                          0x00000611   Thumb Code     0  led.o(.text)
+    LED_SET_PERIOD                           0x00000729   Thumb Code     0  led.o(.text)
+    LED_CYCLE_SPEED                          0x0000072f   Thumb Code     0  led.o(.text)
+    LED_GET_MULTIPLIER                       0x0000074b   Thumb Code     0  led.o(.text)
+    LED_SET_MODE                             0x00000751   Thumb Code     0  led.o(.text)
+    VALSE                                    0x00000799   Thumb Code     0  danses_moves.o(.text)
+    STAR                                     0x000007e3   Thumb Code     0  danses_moves.o(.text)
+    CIRCLE_RIGHT                             0x00000829   Thumb Code     0  danses_moves.o(.text)
+    CIRCLE_LEFT                              0x0000083f   Thumb Code     0  danses_moves.o(.text)
+    DEMICIRCLE_RIGHT                         0x00000855   Thumb Code     0  danses_moves.o(.text)
+    DEMICIRCLE_LEFT                          0x0000086b   Thumb Code     0  danses_moves.o(.text)
+    WALK                                     0x00000881   Thumb Code     0  danses_moves.o(.text)
+    WALK_BACK                                0x000008c1   Thumb Code     0  danses_moves.o(.text)
+    FRONTBACK                                0x00000901   Thumb Code     0  danses_moves.o(.text)
+    FRONT                                    0x00000925   Thumb Code     0  danses_moves.o(.text)
+    FRONTSHORT                               0x0000093b   Thumb Code     0  danses_moves.o(.text)
+    ITALODISCO                               0x00000951   Thumb Code     0  danses_moves.o(.text)
+    BUTTON_INIT                              0x00000a39   Thumb Code     0  button.o(.text)
+    BUTTON1_PRESSED                          0x00000a83   Thumb Code     0  button.o(.text)
+    BUTTON2_PRESSED                          0x00000a9b   Thumb Code     0  button.o(.text)
+    BUMPER_INIT                              0x00000abd   Thumb Code     0  bumpers.o(.text)
+    BUMPER_LEFT_PRESSED                      0x00000afb   Thumb Code     0  bumpers.o(.text)
+    BUMPER_RIGHT_PRESSED                     0x00000b13   Thumb Code     0  bumpers.o(.text)
+    SD_IndexDances                           0x00000b35   Thumb Code     0  sd_driver.o(SD_DRIVER)
+    SD_Init                                  0x00000bcb   Thumb Code     0  sd_driver.o(SD_DRIVER)
+    SD_ReadSector                            0x00000cc5   Thumb Code     0  sd_driver.o(SD_DRIVER)
+    TICK_MS                                  0x20000008   Data           4  led.o(.data)
+    DANCE_COUNT                              0x20000078   Data           4  sd_driver.o(SD_DATA)
+    __initial_sp                             0x20000180   Data           0  startup.o(STACK)
 
 
 
@@ -94,32 +135,36 @@ Memory Map of the image
 
   Image Entry point : 0x0000026d
 
-  Load Region LR_1 (Base: 0x00000000, Size: 0x000008bc, Max: 0xffffffff, ABSOLUTE)
+  Load Region LR_1 (Base: 0x00000000, Size: 0x00000f30, Max: 0xffffffff, ABSOLUTE)
 
-    Execution Region ER_RO (Exec base: 0x00000000, Load base: 0x00000000, Size: 0x00000868, Max: 0xffffffff, ABSOLUTE)
+    Execution Region ER_RO (Exec base: 0x00000000, Load base: 0x00000000, Size: 0x00000eb4, Max: 0xffffffff, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
     0x00000000   0x00000000   0x00000278   Code   RO            3  * RESET               startup.o
-    0x00000278   0x00000278   0x000001e4   Code   RO            9  * .text               motor.o
-    0x0000045c   0x0000045c   0x00000040   Code   RO           12    .text               switch.o
-    0x0000049c   0x0000049c   0x00000074   Code   RO           15  * .text               main.o
-    0x00000510   0x00000510   0x00000028   Code   RO           18    .text               led.o
-    0x00000538   0x00000538   0x00000330   Code   RO           22    SD_DRIVER           sd_driver.o
+    0x00000278   0x00000278   0x000001f0   Code   RO            9  * .text               motor.o
+    0x00000468   0x00000468   0x00000124   Code   RO           15  * .text               main.o
+    0x0000058c   0x0000058c   0x0000020c   Code   RO           23    .text               led.o
+    0x00000798   0x00000798   0x000002a0   Code   RO           27    .text               danses_moves.o
+    0x00000a38   0x00000a38   0x00000084   Code   RO           30    .text               button.o
+    0x00000abc   0x00000abc   0x00000078   Code   RO           33    .text               bumpers.o
+    0x00000b34   0x00000b34   0x00000380   Code   RO           20    SD_DRIVER           sd_driver.o
 
 
-    Execution Region ER_RW (Exec base: 0x20000000, Load base: 0x00000868, Size: 0x00000054, Max: 0xffffffff, ABSOLUTE)
-
-    Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
-
-    0x20000000   0x00000868   0x00000054   Data   RW           21    SD_DATA             sd_driver.o
-
-
-    Execution Region ER_ZI (Exec base: 0x20000058, Load base: 0x000008bc, Size: 0x00000100, Max: 0xffffffff, ABSOLUTE)
+    Execution Region ER_RW (Exec base: 0x20000000, Load base: 0x00000eb4, Size: 0x0000007c, Max: 0xffffffff, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20000058        -       0x00000100   Zero   RW            1    STACK               startup.o
+    0x20000000   0x00000eb4   0x00000008   Data   RW           16    .data               main.o
+    0x20000008   0x00000ebc   0x00000020   Data   RW           24    .data               led.o
+    0x20000028   0x00000edc   0x00000054   Data   RW           19    SD_DATA             sd_driver.o
+
+
+    Execution Region ER_ZI (Exec base: 0x20000080, Load base: 0x00000f30, Size: 0x00000100, Max: 0xffffffff, ABSOLUTE)
+
+    Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
+
+    0x20000080        -       0x00000100   Zero   RW            1    STACK               startup.o
 
 
 ==============================================================================
@@ -129,15 +174,17 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-        40          4          0          0          0        216   led.o
-       116         18          0          0          0        236   main.o
-       484        112          0          0          0        360   motor.o
-       816         46          0         84          0        480   sd_driver.o
-       632        622          0          0        256        252   startup.o
-        64         12          0          0          0        232   switch.o
+       120         10          0          0          0        256   bumpers.o
+       132         10          0          0          0        260   button.o
+       672         32          0          0          0        456   danses_moves.o
+       524         66          0         32          0        408   led.o
+       292          8          0          8          0        324   main.o
+       496        114          0          0          0        376   motor.o
+       896         42          0         84          0        516   sd_driver.o
+       632        622          0          0        256        260   startup.o
 
     ----------------------------------------------------------------------
-      2152        814          0         84        256       1776   Object Totals
+      3764        904          0        124        256       2856   Object Totals
          0          0          0          0          0          0   (incl. Generated)
          0          0          0          0          0          0   (incl. Padding)
 
@@ -152,10 +199,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      2152        814          0         84        256       1776   Grand Totals
-      2152        814          0         84        256       1776   ELF Image Totals
-      2152        814          0         84          0          0   ROM Totals
+      3764        904          0        124        256       2856   Grand Totals
+      3764        904          0        124        256       2856   ELF Image Totals
+      3764        904          0        124          0          0   ROM Totals
 
+==============================================================================
+
+    Total RO  Size (Code + RO Data)                 3764 (   3.68kB)
+    Total RW  Size (RW Data + ZI Data)               380 (   0.37kB)
+    Total ROM Size (Code + RO Data + RW Data)       3888 (   3.80kB)
 
 ==============================================================================
 

@@ -1,210 +1,216 @@
-		AREA |.text|, CODE, READONLY, ALIGN=2
-		ENTRY
-		EXPORT __main
-		IMPORT SD_Init
-		IMPORT SD_ReadSector
-		IMPORT SD_IndexDances
-		IMPORT DANCE_COUNT
-		IMPORT SWITCH_INIT
-		IMPORT READ_SWITCH
-		IMPORT L_LED_ON
-		IMPORT R_LED_ON
-			
-GPIO_PORTF_BASE EQU 0x40025000
-
-		AREA |.text|, CODE, READONLY
-__main
-        BL      SWITCH_INIT
-        
-        LDR     R0, =0x400FE108
-        LDR     R1, [R0]
-        ORR     R1, R1, #0x20      
-        STR     R1, [R0]
-        NOP
-        NOP
-        NOP
-
-        LDR     R0, =GPIO_PORTF_BASE
-        MOV     R1, #0x30           
-        STR     R1, [R0, #0x400]
-        STR     R1, [R0, #0x51C]
-
-        BL      SD_Init
-        CMP     R0, #1
-        BNE     Panic               
-
-        BL      SD_IndexDances
-        
-        MOV     R11, #0             
-
-BOUCLE_PRINCIPALE
-        BL      R_LED_ON       
-        
-ATTENTE_APPUI
-        BL      READ_SWITCH        
-        BNE     ATTENTE_APPUI       
-        
-        LDR     R2, =800000
-DELAI_DEB SUBS R2, R2, #1
-        BNE     DELAI_DEB
-        
-ATTENTE_RELACHE
-        BL      READ_SWITCH
-        BEQ     ATTENTE_RELACHE    
-
-        BL      L_LED_ON
-        MOV     R0, R11
-        BL      SD_ReadSector      
-        
-        ADD     R11, R11, #1
-        B       BOUCLE_PRINCIPALE
-Panic   
-		LDR     R0, =0x400253FC
-		MOV     R1, #0x02          
-		STR     R1, [R0]
-STOP    B       STOP
-		END
 ;; EvalBot - Dancing Robot
-        ;; Wait for input:
-        ;;   - Bumper Left (PE1) = cycle LED speed (1-5)
-        ;;   - Button 1 (SW1/PD6) = VALSE
-        ;;   - Button 2 (SW2/PD7) = ITALODISCO
-        ;;
-        ;; While waiting: both LEDs blink together
-        ;; While dancing: LEDs alternate
+;; Features:
+;;   - Button/Bumper controls
+;;   - LED speed control
+;;   - SD card dance support (right bumper)
+;;   - Hardcoded VALSE/ITALODISCO (buttons)
 
         AREA    |.text|, CODE, READONLY
         ENTRY
         EXPORT  __main
 
+        ;; Hardware init
         IMPORT  MOTEUR_INIT
         IMPORT  LED_INIT
         IMPORT  LED_CYCLE_SPEED
         IMPORT  LED_SET_MODE
         IMPORT  BUMPER_INIT
         IMPORT  BUMPER_LEFT_PRESSED
+        IMPORT  BUMPER_RIGHT_PRESSED
         IMPORT  BUTTON_INIT
         IMPORT  BUTTON1_PRESSED
         IMPORT  BUTTON2_PRESSED
+
+        ;; Dance routines (hardcoded)
         IMPORT  ITALODISCO
         IMPORT  VALSE
+
+        ;; SD card functions
+        IMPORT  SD_Init
+        IMPORT  SD_ReadSector
+        IMPORT  SD_IndexDances
 
 ;; LED modes
 MODE_ALTERNATE  EQU     0
 MODE_TOGETHER   EQU     1
+MODE_SD_OK      EQU     2               ; Right LED fixed ON, left blinks
+MODE_NO_SD      EQU     3               ; Right LED blinks 2x faster than left
+
+;; ============================================
+;; Variables in RAM
+;; ============================================
+        AREA    |.data|, DATA, READWRITE
+SD_AVAILABLE    DCD     0               ; 1 if SD card initialized
+IDLE_MODE       DCD     3               ; LED mode for idle (2=SD_OK, 3=NO_SD)
 
 ;; ============================================
 ;; Main program
 ;; ============================================
+        AREA    |.text|, CODE, READONLY
 __main
+        ;; Initialize all hardware
         BL      MOTEUR_INIT
         BL      LED_INIT
         BL      BUMPER_INIT
         BL      BUTTON_INIT
-        
-        ; Set LED mode to "together" for waiting
-        MOV     R0, #MODE_TOGETHER
+
+        ;; Try to initialize SD card (with timeout - won't hang)
+        BL      SD_Init
+        CMP     R0, #1
+        BNE     sd_not_available
+
+        ;; SD card OK - index dances
+        BL      SD_IndexDances
+        LDR     R0, =SD_AVAILABLE
+        MOV     R1, #1
+        STR     R1, [R0]
+
+        ;; Set idle mode: right LED fixed ON, left blinks
+        LDR     R0, =IDLE_MODE
+        MOV     R1, #MODE_SD_OK
+        STR     R1, [R0]
+        MOV     R0, #MODE_SD_OK
+        BL      LED_SET_MODE
+        B       wait_input
+
+sd_not_available
+        LDR     R0, =SD_AVAILABLE
+        MOV     R1, #0
+        STR     R1, [R0]
+
+        ;; Set idle mode: right LED blinks 2x faster than left
+        LDR     R0, =IDLE_MODE
+        MOV     R1, #MODE_NO_SD
+        STR     R1, [R0]
+        MOV     R0, #MODE_NO_SD
         BL      LED_SET_MODE
 
 ;; ============================================
 ;; Wait loop - wait for button or bumper
 ;; ============================================
 wait_input
-        ; Small delay to avoid too fast polling
         LDR     R1, =0x1000
 poll_delay
         SUBS    R1, #1
         BNE     poll_delay
 
-        ; Check bumper left (PE1) - cycle LED speed
+        ;; Check bumper left - cycle LED speed
         BL      BUMPER_LEFT_PRESSED
         CMP     R0, #1
         BEQ     do_cycle_speed
-        
-        ; Check button 1 (SW1/PD6) - VALSE
+
+        ;; Check bumper right - play SD card dance
+        BL      BUMPER_RIGHT_PRESSED
+        CMP     R0, #1
+        BEQ     do_sd_dance
+
+        ;; Check button 1 (SW1) - ITALODISCO (swapped for test)
         BL      BUTTON1_PRESSED
         CMP     R0, #1
-        BEQ     do_valse
-        
-        ; Check button 2 (SW2/PD7) - ITALODISCO
+        BEQ     do_disco
+
+        ;; Check button 2 (SW2) - VALSE (swapped for test)
         BL      BUTTON2_PRESSED
         CMP     R0, #1
-        BEQ     do_disco
-        
-        ; Nothing pressed, keep waiting
+        BEQ     do_valse
+
         B       wait_input
 
 ;; ============================================
-;; Bumper left pressed - cycle LED speed
+;; Bumper left - cycle LED speed
 ;; ============================================
 do_cycle_speed
         BL      LED_CYCLE_SPEED
-        
-        ; Wait for release
-wait_bumper_release
+
+wait_bumper_left_release
         BL      BUMPER_LEFT_PRESSED
         CMP     R0, #1
-        BEQ     wait_bumper_release
-        
-        ; Longer debounce for bumpers
+        BEQ     wait_bumper_left_release
+
         BL      debounce_long
-        
         B       wait_input
 
 ;; ============================================
-;; Button 1 pressed - VALSE
+;; Bumper right - play SD card dance
+;; ============================================
+do_sd_dance
+wait_bumper_right_release
+        BL      BUMPER_RIGHT_PRESSED
+        CMP     R0, #1
+        BEQ     wait_bumper_right_release
+
+        BL      debounce_long
+
+        ;; Check if SD card is available
+        LDR     R0, =SD_AVAILABLE
+        LDR     R0, [R0]
+        CMP     R0, #1
+        BNE     wait_input          ; no SD card, ignore
+
+        ;; Set LED mode to alternate for dancing
+        MOV     R0, #MODE_ALTERNATE
+        BL      LED_SET_MODE
+
+        ;; Play first dance from SD card (index 0)
+        MOV     R0, #0
+        BL      SD_ReadSector
+
+        ;; Back to idle mode
+        LDR     R0, =IDLE_MODE
+        LDR     R0, [R0]
+        BL      LED_SET_MODE
+        B       wait_input
+
+;; ============================================
+;; Button 1 - VALSE
 ;; ============================================
 do_valse
-        ; Wait for release first
 wait_btn1_release
         BL      BUTTON1_PRESSED
         CMP     R0, #1
         BEQ     wait_btn1_release
-        
+
         BL      debounce
-        
-        ; Set LED mode to alternate for dancing
+
+        ;; Set LED mode to alternate for dancing
         MOV     R0, #MODE_ALTERNATE
         BL      LED_SET_MODE
-        
-        ; Run VALSE
+
+        ;; Play VALSE
         BL      VALSE
-        
-        ; Back to together mode for waiting
-        MOV     R0, #MODE_TOGETHER
+
+        ;; Back to idle mode
+        LDR     R0, =IDLE_MODE
+        LDR     R0, [R0]
         BL      LED_SET_MODE
-        
-        ; Back to waiting
         B       wait_input
 
 ;; ============================================
-;; Button 2 pressed - ITALODISCO
+;; Button 2 - ITALODISCO
 ;; ============================================
 do_disco
-        ; Wait for release first
 wait_btn2_release
         BL      BUTTON2_PRESSED
         CMP     R0, #1
         BEQ     wait_btn2_release
-        
+
         BL      debounce
-        
-        ; Set LED mode to alternate for dancing
+
+        ;; Set LED mode to alternate for dancing
         MOV     R0, #MODE_ALTERNATE
         BL      LED_SET_MODE
-        
-        ; Run ITALODISCO
+
+        ;; Play ITALODISCO 
         BL      ITALODISCO
-        
-        ; Back to together mode for waiting
-        MOV     R0, #MODE_TOGETHER
+
+        ;; Back to idle mode
+        LDR     R0, =IDLE_MODE
+        LDR     R0, [R0]
         BL      LED_SET_MODE
-        
-        ; Back to waiting
         B       wait_input
 
 ;; ============================================
-;; Debounce delay (~50ms) for buttons
+;; Debounce delays
 ;; ============================================
 debounce
         PUSH    {R1, LR}
@@ -215,9 +221,6 @@ deb_loop
         POP     {R1, LR}
         BX      LR
 
-;; ============================================
-;; Debounce delay (~200ms) for bumpers
-;; ============================================
 debounce_long
         PUSH    {R1, LR}
         LDR     R1, =0x200000
