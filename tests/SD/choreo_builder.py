@@ -1,42 +1,69 @@
-import struct
+# Opcodes autorisés uniquement
+AVANT    = 0x01
+ARRIERE  = 0x02
+PIVOT_D  = 0x03
+PIVOT_G  = 0x04
+STOP     = 0x05
+WAIT     = 0xFE
 
-direction_map = {
-    "R": 0b00, # Droite
-    "L": 0b01, # Gauche
-    "F": 0b10, # Avant
-    "B": 0b11, # Arrière
-}
+def move(opcode, duration):
+    """Combine une commande et un délai [Opcode, 0xFE, Durée]"""
+    return [opcode, WAIT, duration]
 
-def create_dance_blocks(moves):
-    """Génère deux blocs de 512 octets : Header + Mouvements"""
+def create_sector(moves):
+    """Crée 512 octets : Signature 'ST' + Mouvements + Fin 0xFF + Padding"""
+    # Signature attendue par SD_IndexDances (Little Endian 'ST' = 0x5453)
+    sector = bytearray([0x53, 0x54]) 
+    sector.extend(moves)
+    sector.append(0xFF) # Fin de chorégraphie
     
-    magic = b"STEP"
-    version = 0x0001
-    num_moves = len(moves)
-    header = magic + struct.pack(">H", version) + struct.pack(">H", num_moves)
-    header_block = header + b"\x00" * (512 - len(header))
+    # Remplissage à 512 octets
+    sector.extend([0x00] * (512 - len(sector)))
+    return sector
 
-    seq_bytes = bytearray()
-    for dir_char, duration in moves:
-        if dir_char not in direction_map:
-            raise ValueError(f"Direction invalide: {dir_char}")
-        byte = (direction_map[dir_char] << 6) | (min(duration, 63) & 0x3F)
-        seq_bytes.append(byte)
-    
-    if len(seq_bytes) < 512:
-        seq_bytes.append(0xFF)
-        
-    seq_block = seq_bytes + b"\x00" * (512 - len(seq_bytes))
-    
-    return header_block + seq_block
+def create_dance_block(moves):
+    """Génère le duo Secteur Header + Secteur Data (1024 octets)"""
+    # Votre code SD_IndexDances cherche 'ST' au début d'un secteur
+    # On crée un header vide avec 'ST' puis le secteur de données avec 'ST'
+    header = create_sector([]) # Juste la signature
+    data = create_sector(moves)
+    return header + data
 
-danse_1 = [("F", 10), ("R", 5), ("F", 10), ("L", 5), ("B", 10)]
-danse_2 = [("R", 20), ("R", 20), ("R", 20), ("R", 20)]         
-danse_3 = [("F", 5), ("B", 5), ("F", 5), ("B", 5), ("F", 30)]
+# --- CONSTRUCTION DES DANSES ---
 
-all_dances = [danse_1, danse_2, danse_3]
+# Danse 1 : Carré (Avance -> Tourne à droite x4)
+danse_triangle = []
+for _ in range(3):
+    danse_triangle.extend(move(AVANT, 3))
+    danse_triangle.extend(move(PIVOT_D, 2)) # Pivot plus long pour l'angle
+danse_triangle.extend(move(STOP, 0))
 
-with open("choreo.bin", "wb") as f:
-    for i, moves in enumerate(all_dances):
-        binary_data = create_dance_blocks(moves)
-        f.write(binary_data)
+danse_moonwalk = move(AVANT, 4)
+for _ in range(4):
+    danse_moonwalk.extend(move(ARRIERE, 1))
+    danse_moonwalk.extend(move(STOP, 1))
+danse_moonwalk.extend(move(STOP, 0))
+
+danse_sentinelle = []
+for _ in range(3):
+    danse_sentinelle.extend(move(PIVOT_G, 2))
+    danse_sentinelle.extend(move(STOP, 2))
+    danse_sentinelle.extend(move(PIVOT_D, 2))
+    danse_sentinelle.extend(move(STOP, 2))
+danse_sentinelle.extend(move(STOP, 0))
+
+danse_tournis = (
+    move(PIVOT_D, 5) + 
+    move(PIVOT_D, 3) + 
+    move(PIVOT_D, 1) + 
+    move(PIVOT_G, 5) + 
+    move(STOP, 0)
+)
+
+with open("choreo_all.bin", "wb") as f:
+    f.write(create_dance_block(danse_moonwalk))   # Secteurs 0 & 1
+    f.write(create_dance_block(danse_sentinelle))  # Secteurs 2 & 3
+    f.write(create_dance_block(danse_tournis))  # Secteurs 4 & 5
+    f.write(create_dance_block(danse_triangle))  # Secteurs 4 & 5
+
+print("Fichier choreo_all.bin généré avec succès.")
